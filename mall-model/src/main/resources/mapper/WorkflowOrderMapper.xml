@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.WorkflowOrderMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.WorkflowOrder">
+        <id column="p_id" property="id"/>
+        <result column="p_wf_id" property="wfId"/>
+        <result column="p_order_sn" property="orderSn"/>
+        <result column="p_createTime" property="createTime"/>
+        <result column="p_example_id" property="exampleId"/>
+    </resultMap>
+
+</mapper>

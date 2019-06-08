@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.OrderChoiceMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.OrderChoice">
+    <id column="p_id" property="id" />
+    <result column="p_order_sn" property="orderSn" />
+    <result column="p_apply_sn" property="applySn" />
+    <result column="p_contract_sn" property="contractSn" />
+    <result column="p_agent_uid" property="agentUid" />
+    <result column="p_name" property="name" />
+    <result column="p_phone" property="phone" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_remark" property="remark" />
+    <result column="p_repertory_id" property="repertoryId" />
+    <result column="p_repertory_name" property="repertoryName" />
+    <result column="p_province" property="province" />
+    <result column="p_province_name" property="provinceName"/>
+    <result column="p_city" property="city" />
+    <result column="p_city_name" property="cityName"/>
+    <result column="p_district" property="district" />
+    <result column="p_district_name" property="districtName"/>
+    <result column="p_address" property="address" />
+    <result column="p_choice_type" property="choiceType" />
+  </resultMap>
+
+</mapper>

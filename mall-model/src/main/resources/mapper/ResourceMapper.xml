@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.ResourceMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.Resource">
+    <id column="p_id"  property="id" />
+    <result column="p_name"  property="name" />
+    <result column="p_type"  property="type" />
+    <result column="p_uri" property="uri" />
+    <result column="p_path"  property="path" />
+    <result column="p_icon" property="icon" />
+    <result column="p_sort" property="sort" />
+    <result column="p_desc"  property="description" />
+    <result column="p_pid"  property="pid" />
+    <result column="p_enable" property="enable" />
+    <result column="p_resource_no" property="resourceNo" />
+  </resultMap>
+
+</mapper>

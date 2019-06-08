@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.NoticeUserMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.NoticeUser">
+    <id column="p_id"  property="id" />
+    <result column="p_uid" property="uid" />
+    <result column="p_notice_id" property="noticeId" />
+    <result column="p_status" property="status" />
+    <result column="p_update_time" property="updateTime" />
+  </resultMap>
+
+
+  <select id="findByUserId" resultType="com.mall.params.resp.NoticeUserResp">
+    SELECT
+    notice_user.p_id id,notice.p_issuer issuer,notice.p_id noticeId,notice.p_title title,
+    notice.p_issue_time issueTime,notice_user.p_status isRead
+    FROM t_notice_user notice_user
+    JOIN t_notice notice ON notice.p_id = notice_user.p_notice_id
+    WHERE notice_user.p_uid=#{userId}
+    ORDER BY notice.p_issue_time DESC
+  </select>
+
+
+</mapper>

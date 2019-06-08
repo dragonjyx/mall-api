@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.AfterSaleOrderPartsMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.AfterSaleOrderParts">
+    <id column="p_id" property="id" />
+    <result column="p_after_sale_order_sn" property="afterSaleOrderSn" />
+    <result column="p_parts_id" property="partsId" />
+    <result column="p_parts_name" property="partsName" />
+    <result column="p_price" property="price" />
+    <result column="p_num" property="num" />
+  </resultMap>
+
+</mapper>

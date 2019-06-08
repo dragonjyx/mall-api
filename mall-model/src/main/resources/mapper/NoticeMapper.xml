@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.NoticeMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.Notice">
+    <id column="p_id" property="id" />
+    <result column="p_title" property="title" />
+    <result column="p_content" property="content" />
+    <result column="p_notice_type" property="noticeType" />
+    <result column="p_sender_type" property="senderType" />
+    <result column="p_sender" property="sender" />
+    <result column="p_issuer_uid" property="issuerUid" />
+    <result column="p_issuer" property="issuer" />
+    <result column="p_status" property="status" />
+    <result column="p_start_time" property="startTime" />
+    <result column="p_end_time" property="endTime" />
+    <result column="p_issue_time" property="issueTime" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_remark" property="remark" />
+  </resultMap>
+
+
+
+  <select id="findByTitleAndTypeAndStatus" resultType="com.mall.model.Notice">
+    SELECT
+    p_id id,p_title title,p_status status,p_start_time startTime,p_end_time endTime,p_issue_time issueTime,p_notice_type noticeType
+    FROM t_notice
+    <where>
+      <if test="title != null and title != ''">
+        p_title LIKE CONCAT('%',#{title},'%')
+      </if>
+      <if test="type != null">
+        AND p_notice_type = #{type}
+      </if>
+      <if test="status != null">
+        AND p_status = #{status}
+      </if>
+      AND p_issuer_uid=#{userId}
+      AND p_update_time BETWEEN #{stateDate} AND #{endDate}
+    </where>
+    ORDER BY p_update_time DESC
+  </select>
+
+
+
+
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.PlatformMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.Platform">
+    <id column="p_id"  property="id" />
+    <result column="p_code" property="code" />
+    <result column="p_name" property="name" />
+    <result column="p_status" property="status" />
+    <result column="p_remark" property="remark" />
+  </resultMap>
+
+
+  <select id="findByNameOrCode" resultMap="BaseResultMap">
+    SELECT * FROM t_platform
+    <where>
+      <if test="name != null and name != ''">
+        p_name LIKE CONCAT('%',#{name},'%')
+      </if>
+      <if test="code != null and code != ''">
+        OR p_code LIKE CONCAT('%',#{code},'%')
+      </if>
+      AND p_status=#{status}
+    </where>
+    ORDER BY p_id DESC
+  </select>
+
+
+  <update id="updateStatus">
+    UPDATE t_platform
+    <set>
+      p_status=#{status}
+    </set>
+    WHERE p_id=#{id}
+  </update>
+
+
+</mapper>

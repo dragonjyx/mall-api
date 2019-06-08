@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.AccountBillMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.AccountBill">
+        <id column="p_id" property="id"/>
+        <result column="p_account_id" property="accountId"/>
+        <result column="p_type" property="type"/>
+        <result column="p_order_sn" property="orderSn"/>
+        <result column="p_status" property="status"/>
+        <result column="p_amount" property="amount"/>
+        <result column="p_is_delete" property="isDelete"/>
+        <result column="p_create_time" property="createTime"/>
+        <result column="p_update_time" property="updateTime"/>
+        <result column="p_bill_status" property="billStatus"/>
+    </resultMap>
+
+
+    <select id="findByNameOrPhoneOrEmail" resultType="com.mall.params.resp.AccountBillResp">
+        SELECT
+        accountBill.p_id id,
+        userInfo.p_name name,userInfo.p_phone phone,userInfo.p_email email,
+        accountBill.p_update_time updateTime,accountBill.p_type type,
+        accountBill.p_status status,accountBill.p_amount amount,accountBill.p_order_sn orderSn
+        FROM t_user users
+        JOIN t_user_info userInfo ON userInfo.p_id=users.p_userinfo_id
+        JOIN t_account account ON account.p_uid=users.p_uid
+        JOIN t_recharge recharge ON recharge.p_uid = users.p_uid
+        JOIN t_account_bill accountBill ON accountBill.p_order_sn=recharge.p_sn
+        <where>
+            <if test="name != null and name != ''">
+               userInfo.p_name LIKE CONCAT('%',#{name},'%')
+            </if>
+            <if test="phone != null and phone != ''">
+                OR userInfo.p_phone LIKE CONCAT('%',#{phone},'%')
+            </if>
+            <if test="email != null and email != ''">
+                OR userInfo.p_email LIKE CONCAT('%',#{email},'%')
+            </if>
+            <if test="status != null">
+                AND accountBill.p_status=#{status}
+            </if>
+            <if test="type != null">
+                AND accountBill.p_type=#{type}
+            </if>
+            AND userInfo.p_parent_uid=#{userId}
+            AND accountBill.p_update_time BETWEEN #{stateDate} AND #{endDate}
+        </where>
+        ORDER BY accountBill.p_update_time DESC
+    </select>
+
+
+    <select id="findByType" resultType="com.mall.params.resp.AccountBillResp">
+        SELECT
+        accountBill.p_id id,
+        userInfo.p_name name,userInfo.p_phone phone,userInfo.p_email email,
+        accountBill.p_update_time updateTime,accountBill.p_type type,
+        accountBill.p_status status,accountBill.p_amount amount,accountBill.p_order_sn orderSn
+        FROM t_user users
+        JOIN t_user_info userInfo ON userInfo.p_id=users.p_userinfo_id
+        JOIN t_account account ON account.p_uid=users.p_uid
+        JOIN t_recharge recharge ON recharge.p_uid = users.p_uid
+        JOIN t_account_bill accountBill ON accountBill.p_order_sn=recharge.p_sn
+        <where>
+            <if test="status != null">
+                accountBill.p_status=#{status}
+            </if>
+            <if test="type != null">
+                AND accountBill.p_type=#{type}
+            </if>
+            AND account.p_uid=#{userId}
+            AND accountBill.p_update_time BETWEEN #{stateDate} AND #{endDate}
+        </where>
+        ORDER BY accountBill.p_update_time DESC
+    </select>
+
+
+    <select id="findBillList" resultMap="BaseResultMap">
+        SELECT * FROM t_account_bill
+        <where>
+            <if test="accountId != null">
+                p_account_id=#{accountId}
+            </if>
+            <if test="type != null">
+                AND p_type=#{type}
+            </if>
+            <if test="stateDate != null and endDate != null">
+                AND p_update_time BETWEEN #{stateDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY p_update_time DESC
+    </select>
+
+
+
+    <select id="sumAmount" resultType="java.math.BigDecimal">
+      SELECT SUM(p_amount) FROM t_account_bill
+      WHERE p_type=#{type}
+      AND p_account_id=#{accountId}
+      AND p_status=#{status}
+      AND p_bill_status=#{billStatus}
+    </select>
+
+
+
+</mapper>

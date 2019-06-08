@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.AfterSaleMemberDeviceMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.AfterSaleMemberDevice">
+    <id column="p_id" property="id" />
+    <result column="member_id" property="memberId" />
+    <result column="p_device_sn" property="deviceSn" />
+    <result column="p_goods_sn" property="goodsSn" />
+    <result column="p_goods_code" property="p_goodsCode" />
+  </resultMap>
+
+
+
+  <select id="findByCategoryIdAndMemberId" resultType="com.mall.params.resp.MemberAddEquipment">
+    SELECT
+    after_sale_member_device.p_id id,after_sale_member_device.p_device_sn deviceSn,
+    device_type.p_name deviceName,order_goods_device.p_guarantee_time guaranteeTime,mall_goods.p_goods_image goodsImage,
+    mall_goods.p_code goodsCode,mall_goods.p_goods_sn goodsSn
+    FROM t_after_sale_member_device after_sale_member_device
+    JOIN t_device device ON device.p_device_sn=after_sale_member_device.p_device_sn
+    JOIN t_order_goods_device order_goods_device ON order_goods_device.p_device_sn=after_sale_member_device.p_device_sn
+    JOIN t_mall_goods mall_goods ON (mall_goods.p_code=after_sale_member_device.p_goods_code AND mall_goods.p_goods_sn=after_sale_member_device.p_goods_sn)
+    JOIN t_device_type device_type ON device_type.p_id=device.p_type_id
+    WHERE
+    device_type.p_device_category_id=#{categoryId}
+    AND after_sale_member_device.p_member_id=#{memberId}
+  </select>
+
+
+
+</mapper>

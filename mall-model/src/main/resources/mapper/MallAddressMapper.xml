@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallAddressMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallAddress">
+    <id column="p_id"  property="id" />
+    <result column="p_uid"  property="uid" />
+    <result column="p_address_sn"  property="addressSn" />
+    <result column="p_consignee"  property="consignee" />
+    <result column="p_country"  property="country" />
+    <result column="p_province"  property="province" />
+    <result column="p_city"  property="city" />
+    <result column="p_district"  property="district" />
+    <result column="p_address"  property="address" />
+    <result column="p_receiver_name"  property="receiverName" />
+    <result column="p_zipcode"  property="zipcode" />
+    <result column="p_phone"  property="phone" />
+    <result column="p_school_name"  property="schoolName" />
+    <result column="p_school_id"  property="schoolId" />
+    <result column="p_dorm_name"  property="dormName" />
+    <result column="p_school_dorm_id"  property="schoolDormId" />
+    <result column="p_type"  property="type" />
+    <result column="p_is_default"  property="isDefault" />
+  </resultMap>
+
+
+  <update id="setAddressDetault">
+    UPDATE t_mall_address
+    <set>
+      <if test="isDefault != null">
+        p_is_default = #{isDefault}
+      </if>
+      <if test="isDefault == null">
+        p_is_default = 0
+      </if>
+    </set>
+    <where>
+      <if test="memberId != null and memberId != ''">
+        p_uid=#{memberId}
+      </if>
+      <if test="addressSn != null and addressSn != ''">
+        AND p_address_sn=#{addressSn}
+      </if>
+    </where>
+  </update>
+
+
+
+</mapper>

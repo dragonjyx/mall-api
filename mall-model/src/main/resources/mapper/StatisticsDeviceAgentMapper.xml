@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.StatisticsDeviceAgentMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.StatisticsDeviceAgent">
+    <id column="p_id" property="id" />
+    <result column="p_date_condition" property="dateCondition" />
+    <result column="p_agent_uid" property="agentUid" />
+    <result column="p_agent_name" property="agentName" />
+    <result column="p_choice_num" property="choiceNum" />
+    <result column="p_send_num" property="sendNum" />
+    <result column="p_choice_earnings" property="choiceEarnings" />
+    <result column="p_send_earnings" property="sendEarnings" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_task_id" property="taskId" />
+  </resultMap>
+
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into t_statistics_device_agent (p_date_condition,p_agent_uid,p_agent_name,p_choice_num,p_send_num,
+    p_choice_earnings,p_send_earnings,p_create_time,p_task_id) values
+    <foreach collection="agents" item="item" separator="," >
+      (
+      #{item.dateCondition},
+      #{item.agentUid},
+      #{item.agentName},
+      #{item.choiceNum},
+      #{item.sendNum},
+      #{item.choiceEarnings},
+      #{item.sendEarnings},
+      #{item.createTime},
+      #{item.taskId}
+      )
+    </foreach>
+  </insert>
+
+  <update id="updateBatch" parameterType="java.util.List">
+    update t_statistics_device_agent
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="p_update_time =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.updateTime!=null">
+            when p_id = #{item.id} then #{item.updateTime}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_choice_num =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.choiceNum!=null">
+            when p_id = #{item.id} then #{item.choiceNum}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_send_num =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.sendNum!=null">
+            when p_id = #{item.id} then #{item.sendNum}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_task_id =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.taskId!=null">
+            when p_id = #{item.id} then #{item.taskId}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_agent_name =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.agentName!=null">
+            when p_id = #{item.id} then #{item.agentName}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_choice_earnings =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.choice_earnings!=null">
+            when p_id = #{item.id} then #{item.choiceEarnings}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_send_earnings =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.sendEarnings!=null">
+            when p_id = #{item.id} then #{item.sendEarnings}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where
+    <foreach collection="agents" separator="or" item="item" index="index" >
+      p_id = #{item.id}
+    </foreach>
+  </update>
+
+</mapper>

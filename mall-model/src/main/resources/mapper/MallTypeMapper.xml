@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallTypeMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallType">
+    <id column="p_id"  property="id" />
+    <result column="p_name"  property="name" />
+    <result column="p_sort"  property="sort" />
+    <result column="p_category_id"  property="categoryId" />
+    <result column="p_category_name"  property="categoryName" />
+    <result column="p_status"  property="status" />
+    <result column="p_image_url"  property="imageUrl" />
+  </resultMap>
+
+</mapper>

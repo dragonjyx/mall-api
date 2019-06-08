@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.RechargeMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.Recharge">
+    <id column="p_id"  property="id" />
+    <result column="p_sn"  property="sn" />
+    <result column="p_uid"  property="uid" />
+    <result column="p_name" property="name" />
+    <result column="p_recharge_uid"  property="rechargeUid" />
+    <result column="p_recharge_user_name"  property="rechargeName" />
+    <result column="p_type"  property="type" />
+    <result column="p_status" property="status" />
+    <result column="p_payment_code"  property="paymentCode" />
+    <result column="p_voucher"  property="voucher" />
+    <result column="p_create_time"  property="createTime" />
+    <result column="p_remark"  property="remark" />
+  </resultMap>
+
+</mapper>

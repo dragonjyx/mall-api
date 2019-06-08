@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallBrandMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallBrand">
+    <id column="p_id"  property="id" />
+    <result column="p_name"  property="name" />
+    <result column="p_intial"  property="intial" />
+    <result column="p_logo"  property="logo" />
+    <result column="p_desc"  property="desc" />
+    <result column="p_url"  property="url" />
+    <result column="p_sort"  property="sort" />
+    <result column="p_category_id"  property="categoryId" />
+    <result column="p_is_recommened" property="isRecommened" />
+    <result column="p_type"  property="type" />
+    <result column="p_status"  property="status" />
+  </resultMap>
+
+  <update id="updateMallBrandByCategoryId">
+    update t_mall_brand set p_category_id = null where p_category_id = #{categoryId}
+  </update>
+</mapper>

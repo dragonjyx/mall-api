@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.StatisticsOrderDeviceTypeMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.StatisticsOrderDeviceType">
+    <id column="p_id" property="id" />
+    <result column="p_date_condition" property="dateCondition" />
+    <result column="p_device_type_id" property="deviceTypeId" />
+    <result column="p_device_type_name" property="deviceTypeName" />
+    <result column="p_market_price" property="marketPrice" />
+    <result column="p_price" property="price" />
+    <result column="p_earnings" property="earnings" />
+    <result column="p_market_earnings" property="marketEarnings" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_task_id" property="taskId" />
+  </resultMap>
+
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into t_statistics_order_device_type (p_date_condition,p_device_type_id,p_device_type_name,p_market_price,
+    p_price,p_earnings,p_market_earnings,p_create_time,p_task_id) values
+    <foreach collection="deviceTypes" item="item" separator="," >
+      (
+      #{item.dateCondition},
+      #{item.deviceTypeId},
+      #{item.deviceTypeName},
+      #{item.marketPrice},
+      #{item.price},
+      #{item.earnings},
+      #{item.marketEarnings},
+      #{item.createTime},
+      #{item.taskId}
+      )
+    </foreach>
+  </insert>
+
+
+  <update id="updateBatch" parameterType="java.util.List">
+    update t_statistics_order_device_type
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="p_update_time =case" suffix="end,">
+        <foreach collection="deviceTypes" item="item" index="index">
+          <if test="item.updateTime!=null">
+            when p_id = #{item.id} then #{item.updateTime}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_earnings =case" suffix="end,">
+        <foreach collection="deviceTypes" item="item" index="index">
+          <if test="item.earnings!=null">
+            when p_id = #{item.id} then #{item.earnings}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_price =case" suffix="end,">
+        <foreach collection="deviceTypes" item="item" index="index">
+          <if test="item.price!=null">
+            when p_id = #{item.id} then #{item.price}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_task_id =case" suffix="end,">
+        <foreach collection="deviceTypes" item="item" index="index">
+          <if test="item.taskId!=null">
+            when p_id = #{item.id} then #{item.taskId}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_market_price =case" suffix="end,">
+        <foreach collection="deviceTypes" item="item" index="index">
+          <if test="item.marketPrice!=null">
+            when p_id = #{item.id} then #{item.marketPrice}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_market_earnings =case" suffix="end,">
+        <foreach collection="deviceTypes" item="item" index="index">
+          <if test="item.marketEarnings!=null">
+            when p_id = #{item.id} then #{item.marketEarnings}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where
+    <foreach collection="deviceTypes" separator="or" item="item" index="index" >
+      p_id = #{item.id}
+    </foreach>
+  </update>
+
+</mapper>

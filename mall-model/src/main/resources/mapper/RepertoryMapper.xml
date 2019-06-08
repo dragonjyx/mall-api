@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.RepertoryMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.Repertory">
+    <id column="p_id" property="id" />
+    <result column="p_name" property="name" />
+    <result column="p_province" property="province" />
+    <result column="p_province_name" property="provinceName" />
+    <result column="p_city" property="city" />
+    <result column="p_city_name" property="cityName" />
+    <result column="p_district" property="district" />
+    <result column="p_district_name" property="districtName" />
+    <result column="p_address" property="address" />
+    <result column="p_abstract" property="abstract" />
+    <result column="p_status" property="status" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_remark" property="remark" />
+    <result column="p_uid" property="uid" />
+  </resultMap>
+
+</mapper>

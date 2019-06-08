@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.OrderExchangeMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.OrderExchange">
+    <id column="p_id" property="id" />
+    <result column="p_order_sn" property="orderSn" />
+    <result column="p_apply_sn" property="applySn" />
+    <result column="p_agent_uid" property="agentUid" />
+    <result column="p_agent_name" property="agentName" />
+    <result column="p_store_id" property="storeId" />
+    <result column="p_store_name" property="storeName" />
+    <result column="p_store_address" property="storeAddress" />
+    <result column="p_apply_info" property="applyInfo" />
+    <result column="p_reason" property="reason" />
+    <result column="p_remark" property="remark" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+  </resultMap>
+
+</mapper>

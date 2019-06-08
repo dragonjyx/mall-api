@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.ProduceOrderMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.ProduceOrder">
+    <id column="p_id"  property="id" />
+    <result column="p_sn"  property="sn" />
+    <result column="p_order_sn"  property="orderSn" />
+    <result column="p_device_type_id"  property="deviceTypeId" />
+    <result column="p_device_type_name"  property="deviceTypeName" />
+    <result column="p_num" property="num" />
+    <result column="p_status"  property="status" />
+    <result column="p_type"  property="type" />
+    <result column="p_create_time"  property="createTime" />
+    <result column="p_finished_time"  property="finishedTime" />
+    <result column="p_remark"  property="remark" />
+  </resultMap>
+
+</mapper>

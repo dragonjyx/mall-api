@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.WorkflowExampleMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.WorkflowExample">
+    <id column="p_id" property="id" />
+    <result column="p_name"  property="name" />
+    <result column="p_example_id"  property="exampleId" />
+    <result column="p_node_id"  property="nodeId" />
+    <result column="p_wf_id" property="wfId" />
+    <result column="p_uid" property="uid" />
+    <result column="p_user_name" property="userName" />
+    <result column="p_status" property="status" />
+    <result column="p_node_id" property="nodeId" />
+    <result column="p_create_time"  property="createTime" />
+    <result column="p_update_time"  property="updateTime" />
+    <result column="p_reamrk"  property="reamrk" />
+  </resultMap>
+
+
+  <select id="findByUserIdAndStatus" resultMap="BaseResultMap">
+    SELECT DISTINCT workflow_example.* FROM t_workflow_example workflow_example
+    JOIN t_workflow_line_logs workflow_line_logs ON workflow_example.p_wf_id=workflow_line_logs.p_wf_id
+    <where>
+      workflow_line_logs.p_handler_users  LIKE CONCAT('%',#{userId},'%')
+      AND workflow_line_logs.p_status in
+      <foreach collection="statusList" index="index" item="item" open="(" separator="," close=")">
+         #{item}
+      </foreach>
+    </where>
+    ORDER BY workflow_example.p_update_time DESC
+  </select>
+
+
+
+
+</mapper>

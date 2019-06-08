@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.WorkflowLineMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.WorkflowLine">
+        <id column="p_id" property="id"/>
+        <result column="p_wfid" property="wfid"/>
+        <result column="p_type" property="type"/>
+        <result column="p_condition" property="pCondition"/>
+        <result column="p_node_id" property="nodeId"/>
+        <result column="p_pre_node_id" property="preNodeId"/>
+        <result column="p_next_node_id" property="nextNodeId"/>
+    </resultMap>
+
+</mapper>

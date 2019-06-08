@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.User">
+    <id column="p_id"  property="id" />
+    <result column="p_uid"  property="uid" />
+    <result column="p_username"  property="username" />
+    <result column="p_password"  property="password" />
+    <result column="p_alias"  property="alias" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_login_time"  property="loginTime" />
+    <result column="p_login_ip"  property="loginIp" />
+    <result column="p_visit_count"  property="visitCount" />
+    <result column="p_error_count"  property="errorCount" />
+    <result column="p_is_account"  property="isAccount" />
+    <result column="p_key" property="pkey" />
+    <result column="p_status"  property="status" />
+    <result column="p_is_lock"  property="isLock" />
+    <result column="p_remark"  property="remark" />
+    <result column="p_userinfo_id" property="userinfoId" />
+    <result column="p_unionid" property="openId" />
+  </resultMap>
+
+
+
+</mapper>

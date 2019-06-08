@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.OrderPendulumMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.OrderPendulum">
+    <id column="p_id"  property="id" />
+    <result column="p_order_sn"  property="orderSn" />
+    <result column="p_apply_sn"  property="applySn" />
+    <result column="p_contract_sn"  property="contractSn" />
+    <result column="p_agent_uid"  property="agentUid" />
+    <result column="p_agent_name"  property="agentName" />
+    <result column="p_store_id"  property="storeId" />
+    <result column="p_store_name"  property="storeName" />
+    <result column="p_store_address"  property="storeAddress" />
+    <result column="p_assistant_1"  property="assistant1" />
+    <result column="p_phone_1"  property="phone1" />
+    <result column="p_assistant_2"  property="assistant2" />
+    <result column="p_phone_2"  property="phone2" />
+    <result column="p_status"  property="status" />
+    <result column="p_create_time"  property="createTime" />
+    <result column="p_update_time"  property="updateTime" />
+    <result column="p_remark"  property="remark" />
+    <result column="p_province" property="province" />
+    <result column="p_province_name" property="provinceName"/>
+    <result column="p_city" property="city" />
+    <result column="p_city_name" property="cityName"/>
+    <result column="p_district" property="district" />
+    <result column="p_district_name" property="districtName"/>
+  </resultMap>
+
+</mapper>

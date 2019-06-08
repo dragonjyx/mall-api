@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.CreditBillMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.CreditBill">
+    <id column="p_id"  property="id" />
+    <result column="p_uid" property="uid" />
+    <result column="p_name"  property="name" />
+    <result column="p_adjust_uid" property="adjustUid" />
+    <result column="p_adjust_user_name" property="adjustUserName" />
+    <result column="p_type" property="type" />
+    <result column="p_order_sn"  property="orderSn" />
+    <result column="p_amount"  property="amount" />
+    <result column="p_create_time"  property="createTime" />
+  </resultMap>
+
+
+  <select id="findByNameOrPhoneOrEmail" resultType="com.mall.params.resp.CreditBillResp">
+      SELECT
+      creditBill.p_id id,
+      userInfo.p_phone phone,userInfo.p_email email,
+      creditBill.p_create_time createTime,creditBill.p_type type,creditBill.p_order_sn orderSn,
+      creditBill.p_name name,creditBill.p_uid uid,creditBill.p_amount amount,creditBill.p_adjust_uid adjustUid,creditBill.p_adjust_user_name adjustUserName
+      FROM t_user users
+      JOIN t_user_info userInfo ON userInfo.p_id=users.p_userinfo_id
+      JOIN t_credit_bill creditBill ON creditBill.p_uid=users.p_uid
+      <where>
+        <if test="name != null and name != ''">
+          userInfo.p_name LIKE CONCAT('%',#{name},'%')
+        </if>
+        <if test="phone != null and phone != ''">
+          OR userInfo.p_phone LIKE CONCAT('%',#{phone},'%')
+        </if>
+        <if test="email != null and email != ''">
+          OR userInfo.p_email LIKE CONCAT('%',#{email},'%')
+        </if>
+        <if test="type != null">
+          AND creditBill.p_type=#{type}
+        </if>
+        AND userInfo.p_parent_uid=#{userId}
+        AND creditBill.p_create_time BETWEEN #{stateDate} AND #{endDate}
+      </where>
+      ORDER BY creditBill.p_create_time DESC
+  </select>
+
+
+  <select id="findByType" resultType="com.mall.params.resp.CreditBillResp">
+      SELECT
+      creditBill.p_id id,
+      userInfo.p_phone phone,userInfo.p_email email,
+      creditBill.p_create_time createTime,creditBill.p_type type,creditBill.p_order_sn orderSn,
+      creditBill.p_name name,creditBill.p_uid uid,creditBill.p_amount amount,creditBill.p_adjust_uid adjustUid,creditBill.p_adjust_user_name adjustUserName
+      FROM t_user users
+      JOIN t_user_info userInfo ON userInfo.p_id=users.p_userinfo_id
+      JOIN t_credit_bill creditBill ON creditBill.p_uid=users.p_uid
+      <where>
+        <if test="type != null">
+          creditBill.p_type=#{type}
+        </if>
+        AND creditBill.p_uid=#{userId}
+        AND creditBill.p_create_time BETWEEN #{stateDate} AND #{endDate}
+      </where>
+      ORDER BY creditBill.p_create_time DESC
+  </select>
+
+
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.AccountBillOfflineMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.AccountBillOffline">
+        <id column="p_id" property="id"/>
+        <result column="p_account_id" property="accountId"/>
+        <result column="p_type" property="type"/>
+        <result column="p_order_sn" property="orderSn"/>
+        <result column="p_status" property="status"/>
+        <result column="p_amount" property="amount"/>
+        <result column="p_is_delete" property="isDelete"/>
+        <result column="p_create_time" property="createTime"/>
+        <result column="p_update_time" property="updateTime"/>
+        <result column="p_bill_status" property="billStatus"/>
+        <result column="p_month" property="month"/>
+    </resultMap>
+
+
+    <select id="findBillList" resultMap="BaseResultMap">
+        SELECT * FROM t_account_bill_offline
+        <where>
+            <if test="accountId != null">
+                p_account_id=#{accountId}
+            </if>
+            <if test="type != null">
+                AND p_type=#{type}
+            </if>
+            <if test="stateDate != null and endDate != null">
+                AND p_update_time BETWEEN #{stateDate} AND #{endDate}
+            </if>
+        </where>
+        ORDER BY p_update_time DESC
+    </select>
+
+
+
+    <select id="sumAmount" resultType="java.math.BigDecimal">
+      SELECT SUM(p_amount) FROM t_account_bill_offline
+      WHERE p_type=#{type}
+      AND p_account_id=#{accountId}
+      AND p_status=#{status}
+      AND p_bill_status=#{billStatus}
+    </select>
+
+
+
+</mapper>

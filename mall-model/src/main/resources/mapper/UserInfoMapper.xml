@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.UserInfoMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.UserInfo">
+    <id column="p_id"  property="id" />
+    <result column="p_parent_uid"  property="parentUid" />
+    <result column="p_name" property="name" />
+    <result column="p_id_card"  property="idCard" />
+    <result column="p_id_card_front_img"  property="idCardFrontImg" />
+    <result column="p_id_card_back_img"  property="idCardBackImg" />
+    <result column="p_permission_code" property="permissionCode" />
+    <result column="p_birthday" property="birthday" />
+    <result column="p_avatar_url"  property="avatarUrl" />
+    <result column="p_sex"  property="sex" />
+    <result column="p_email"  property="email" />
+    <result column="p_department" property="department" />
+    <result column="p_postition"  property="postition" />
+    <result column="p_phone" property="phone" />
+    <result column="p_address"  property="address" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_remark" property="remark" />
+  </resultMap>
+
+
+  <select id="findMyUserlist" resultType="com.mall.model.UserInfo">
+    SELECT
+    userInfo.p_id id,userInfo.p_parent_uid parentUid,userInfo.p_name name,
+    userInfo.p_id_card idCard,userInfo.p_id_card_front_img idCardFrontImg,
+    userInfo.p_id_card_back_img idCardBackImg,userInfo.p_birthday birthday,
+    userInfo.p_avatar_url avatarUrl,userInfo.p_sex sex,userInfo.p_email email,
+    userInfo.p_department department,userInfo.p_postition postition,userInfo.p_phone phone,
+    userInfo.p_address address,userInfo.p_create_time createTime,userInfo.p_update_time updateTime,
+    userInfo.p_remark remark,userInfo.p_permission_code permissionCode,per.p_name permissionName,
+    us.p_alias,us.p_status status
+    FROM t_user_info userInfo
+    LEFT JOIN t_user us ON us.p_userinfo_id=userInfo.p_id
+    LEFT JOIN t_permission per ON userInfo.p_permission_code=per.p_type
+    <where>
+      <if test="name != null and name != ''">
+         userInfo.p_name LIKE CONCAT('%',#{name},'%')
+      </if>
+      <if test="phone != null and phone != ''">
+        OR userInfo.p_phone LIKE CONCAT('%',#{phone},'%')
+      </if>
+      <if test="email != null and email != ''">
+        OR userInfo.p_email LIKE CONCAT('%',#{email},'%')
+      </if>
+      <if test="status != null ">
+        AND us.p_status=#{status}
+      </if>
+      <if test="userId != null ">
+         AND  userInfo.p_parent_uid=#{userId}
+      </if>
+      <if test="permissionCode != null and permissionCode != ''">
+        AND userInfo.p_permission_code=#{permissionCode}
+      </if>
+    </where>
+    ORDER BY userInfo.p_update_time DESC
+  </select>
+
+
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.OrderGoodsMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.OrderGoods">
+    <id column="p_id"  property="id" />
+    <result column="p_order_sn"  property="orderSn" />
+    <result column="p_goods_sn"  property="goodsSn" />
+    <result column="p_goods_name"  property="goodsName" />
+    <result column="p_goods_code"  property="goodsCode" />
+    <result column="p_num"  property="num" />
+    <result column="p_cost_price"  property="costPrice" />
+    <result column="p_market_price"  property="marketPrice" />
+    <result column="p_price"  property="price" />
+    <result column="p_spec_value"  property="specValue" />
+    <result column="p_shiped_num"  property="shipedNum" />
+    <result column="p_ship_type"  property="shipType" />
+    <result column="p_goods_image"  property="goodsImage" />
+  </resultMap>
+
+
+
+
+
+</mapper>

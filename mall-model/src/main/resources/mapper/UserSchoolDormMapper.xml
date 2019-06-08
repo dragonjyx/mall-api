@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.UserSchoolDormMapper">
+
+  <resultMap id="BaseResultMap" type="com.mall.model.UserSchoolDorm">
+    <id column="p_id"  property="id" />
+    <result column="p_user_id"  property="userId" />
+    <result column="p_user_name"  property="userName" />
+    <result column="p_school_name"  property="schoolName" />
+    <result column="p_school_id"  property="schoolId" />
+    <result column="p_dorm_name"  property="dormName" />
+    <result column="p_dorm_id" property="dormId" />
+  </resultMap>
+
+
+
+</mapper>

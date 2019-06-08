@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallSpecValueMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallSpecValue">
+    <id column="p_id"  property="id" />
+    <result column="p_code"  property="code" />
+    <result column="p_name"  property="name" />
+    <result column="p_spec_id"  property="specId" />
+    <result column="p_category_id"  property="categoryId" />
+    <result column="p_sort"  property="sort" />
+  </resultMap>
+
+  <update id="updateMallSpecValueBySpecId">
+    update t_mall_spec_value set p_spec_id = null where p_spec_id = #{specId}
+  </update>
+
+  <update id="updateMallSpecValueByCategoryId">
+    update t_mall_spec_value set p_category_id = null where p_category_id = #{categoryId}
+  </update>
+
+</mapper>

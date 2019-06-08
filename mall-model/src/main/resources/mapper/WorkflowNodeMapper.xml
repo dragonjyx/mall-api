@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.WorkflowNodeMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.WorkflowNode">
+        <id column="p_id" property="id"/>
+        <result column="p_name" property="name"/>
+        <result column="p_action" property="action"/>
+        <result column="p_data" property="data"/>
+        <result column="p_handler_type" property="handlerType"/>
+        <result column="p_handler" property="handler"/>
+        <result column="p_handler_name" property="handlerName"/>
+        <result column="p_type" property="type"/>
+        <result column="p_branch" property="branch"/>
+        <result column="p_create_time" property="createTime"/>
+        <result column="p_update_time" property="updateTime"/>
+        <result column="p_remark" property="remark"/>
+    </resultMap>
+
+
+
+
+
+
+
+
+</mapper>

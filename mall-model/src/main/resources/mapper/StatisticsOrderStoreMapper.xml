@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.StatisticsOrderStoreMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.StatisticsOrderStore">
+    <id column="p_id" property="id" />
+    <result column="p_date_condition" property="dateCondition" />
+    <result column="p_store_id" property="storeId" />
+    <result column="p_store_name" property="storeName" />
+    <result column="p_agent_uid" property="agentUid" />
+    <result column="p_order_amount" property="orderAmount" />
+    <result column="p_amount" property="amount" />
+    <result column="p_earnings" property="earnings" />
+    <result column="p_order_earnings" property="orderEarnings" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_task_id" property="taskId" />
+    <result column="p_province" property="province" />
+    <result column="p_province_name" property="provinceName" />
+    <result column="p_city" property="city" />
+    <result column="p_city_name" property="cityName" />
+    <result column="p_district" property="district" />
+    <result column="p_district_name" property="districtName" />
+    <result column="p_address" property="address" />
+  </resultMap>
+
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into t_statistics_order_store (p_date_condition,p_store_id,p_store_name,p_agent_uid,p_order_amount,
+    p_amount,p_earnings,p_order_earnings,p_create_time,p_task_id,p_province,p_province_name,p_city,p_city_name,
+    p_district,p_district_name,p_address) values
+    <foreach collection="stores" item="item" separator="," >
+      (
+      #{item.dateCondition},
+      #{item.storeId},
+      #{item.storeName},
+      #{item.agentUid},
+      #{item.orderAmount},
+      #{item.amount},
+      #{item.earnings},
+      #{item.orderEarnings},
+      #{item.createTime},
+      #{item.taskId},
+      #{item.province},
+      #{item.provinceName},
+      #{item.city},
+      #{item.cityName},
+      #{item.district},
+      #{item.districtName},
+      #{item.address}
+      )
+    </foreach>
+  </insert>
+
+  <update id="updateBatch" parameterType="java.util.List">
+    update t_statistics_order_store
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="p_update_time =case" suffix="end,">
+        <foreach collection="stores" item="item" index="index">
+          <if test="item.updateTime!=null">
+            when p_id = #{item.id} then #{item.updateTime}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_earnings =case" suffix="end,">
+        <foreach collection="stores" item="item" index="index">
+          <if test="item.earnings!=null">
+            when p_id = #{item.id} then #{item.earnings}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_amount =case" suffix="end,">
+        <foreach collection="stores" item="item" index="index">
+          <if test="item.amount!=null">
+            when p_id = #{item.id} then #{item.amount}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_task_id =case" suffix="end,">
+        <foreach collection="stores" item="item" index="index">
+          <if test="item.taskId!=null">
+            when p_id = #{item.id} then #{item.taskId}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_order_amount =case" suffix="end,">
+        <foreach collection="stores" item="item" index="index">
+          <if test="item.orderAmount!=null">
+            when p_id = #{item.id} then #{item.orderAmount}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_order_earnings =case" suffix="end,">
+        <foreach collection="stores" item="item" index="index">
+          <if test="item.orderEarnings!=null">
+            when p_id = #{item.id} then #{item.orderEarnings}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where
+    <foreach collection="stores" separator="or" item="item" index="index" >
+      p_id = #{item.id}
+    </foreach>
+  </update>
+
+</mapper>

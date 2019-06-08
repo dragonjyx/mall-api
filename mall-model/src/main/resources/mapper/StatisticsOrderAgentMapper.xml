@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.StatisticsOrderAgentMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.StatisticsOrderAgent">
+    <id column="p_id" property="id" />
+    <result column="p_date_condition" property="dateCondition" />
+    <result column="p_agent_uid" property="agentUid" />
+    <result column="p_agent_name" property="agentName" />
+    <result column="p_order_amount" property="orderAmount" />
+    <result column="p_amount" property="amount" />
+    <result column="p_order_num" property="orderNum" />
+    <result column="p_ord_num" property="ordNum" />
+    <result column="p_earnings" property="earnings" />
+    <result column="p_order_earnings" property="orderEarnings" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_task_id" property="taskId" />
+  </resultMap>
+
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into t_statistics_order_agent (p_date_condition,p_agent_uid,p_agent_name,p_order_amount,p_amount,
+    p_order_num,p_earnings,p_order_earnings,p_create_time,p_task_id,p_ord_num) values
+    <foreach collection="agents" item="item" separator="," >
+      (
+      #{item.dateCondition},
+      #{item.agentUid},
+      #{item.agentName},
+      #{item.orderAmount},
+      #{item.amount},
+      #{item.orderNum},
+      #{item.earnings},
+      #{item.orderEarnings},
+      #{item.createTime},
+      #{item.taskId},
+      #{item.ordNum}
+      )
+    </foreach>
+  </insert>
+
+  <update id="updateBatch" parameterType="java.util.List">
+    update t_statistics_order_agent
+    <trim prefix="set" suffixOverrides=",">
+      <trim prefix="p_update_time =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.updateTime!=null">
+            when p_id = #{item.id} then #{item.updateTime}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_earnings =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.earnings!=null">
+            when p_id = #{item.id} then #{item.earnings}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_amount =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.amount!=null">
+            when p_id = #{item.id} then #{item.amount}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_task_id =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.taskId!=null">
+            when p_id = #{item.id} then #{item.taskId}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_order_amount =case" suffix="end,">
+        <foreach collection="orderAmount" item="item" index="index">
+          <if test="item.orderAmount!=null">
+            when p_id = #{item.id} then #{item.orderAmount}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_order_num =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.orderNum!=null">
+            when p_id = #{item.id} then #{item.orderNum}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_ord_num =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.ordNum!=null">
+            when p_id = #{item.id} then #{item.ordNum}
+          </if>
+        </foreach>
+      </trim>
+      <trim prefix="p_order_earnings =case" suffix="end,">
+        <foreach collection="agents" item="item" index="index">
+          <if test="item.orderEarnings!=null">
+            when p_id = #{item.id} then #{item.orderEarnings}
+          </if>
+        </foreach>
+      </trim>
+    </trim>
+    where
+    <foreach collection="agents" separator="or" item="item" index="index" >
+      p_id = #{item.id}
+    </foreach>
+  </update>
+
+</mapper>

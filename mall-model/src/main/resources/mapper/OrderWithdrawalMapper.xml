@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.OrderWithdrawalMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.OrderWithdrawal">
+    <id column="p_id"  property="id" />
+    <result column="p_order_sn"  property="orderSn" />
+    <result column="p_apply_sn"  property="applySn" />
+    <result column="p_agent_uid"  property="agentUid" />
+    <result column="p_origin_store_id"  property="originStoreId" />
+    <result column="p_origin_strore_name"  property="originStroreName" />
+    <result column="p_origin_store_address"  property="originStoreAddress" />
+    <result column="p_show_time"  property="showTime" />
+    <result column="p_reason"  property="reason" />
+    <result column="p_new_store_id"  property="newStoreId" />
+    <result column="p_new_store_name" property="newStoreName" />
+    <result column="p_new_store_address" property="newStoreAddress" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_remark" property="remark" />
+  </resultMap>
+
+</mapper>

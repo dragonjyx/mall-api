@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.StoreShowMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.StoreShow">
+    <id column="p_id"  property="id" />
+    <result column="p_store_id"  property="storeId" />
+    <result column="p_device_type_id" property="deviceTypeId" />
+    <result column="p_device_type_name"  property="deviceTypeName" />
+    <result column="p_goods_sn"  property="goodsSn" />
+    <result column="p_goods_code" property="goodsCode" />
+    <result column="p_device_sn"  property="deviceSn" />
+    <result column="p_show_start"  property="showStart" />
+    <result column="p_show_end"  property="showEnd" />
+  </resultMap>
+
+</mapper>

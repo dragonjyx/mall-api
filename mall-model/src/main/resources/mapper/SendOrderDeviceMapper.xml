@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.SendOrderDeviceMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.SendOrderDevice">
+    <id column="p_id"  property="id" />
+    <result column="p_order_sn"  property="orderSn" />
+    <result column="p_send_sn"  property="sendSn" />
+    <result column="p_device_type_id"  property="deviceTypeId" />
+    <result column="p_device_type_name"  property="deviceTypeName" />
+    <result column="p_device_sn"  property="deviceSn" />
+  </resultMap>
+
+</mapper>

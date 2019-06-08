@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.DeviceTypeMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.DeviceType">
+    <id column="p_id"  property="id" />
+    <result column="p_name"  property="name" />
+    <result column="p_model"  property="model" />
+    <result column="p_device_category_id"  property="deviceCategoryId" />
+    <result column="p_device_category_name"  property="deviceCategoryName" />
+    <result column="p_factory_id"  property="factoryId" />
+    <result column="p_factory_name"  property="factoryName" />
+    <result column="p_remark"  property="remark" />
+  </resultMap>
+
+</mapper>

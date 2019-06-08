@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallGoodsCommonMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallGoodsCommon">
+    <id column="p_id"  property="id" />
+    <result column="p_sn"  property="sn" />
+    <result column="p_name"  property="name" />
+    <result column="p_jingle"  property="jingle" />
+    <result column="p_category_id"  property="categoryId" />
+    <result column="p_category_name"  property="categoryName" />
+    <result column="p_brand_id"  property="brandId" />
+    <result column="p_brand_name"  property="brandName" />
+    <result column="p_type_id"  property="typeId" />
+    <result column="p_image"  property="image" />
+    <result column="p_common_desc"  property="commonDesc" />
+    <result column="p_status"  property="status" />
+    <result column="p_freight"  property="freight" />
+    <result column="p_is_vat" property="isVat" />
+    <result column="p_is_commend" property="isCommend" />
+    <result column="p_is_hot"  property="isHot" />
+    <result column="p_region_id"  property="regionId" />
+    <result column="p_region"  property="region" />
+    <result column="p_create_time"  property="createTime" />
+    <result column="p_sell_time"  property="sellTime" />
+    <result column="p_guarantee"  property="guarantee" />
+    <result column="p_unit"  property="unit" />
+    <result column="p_remark"  property="remark" />
+    <result column="p_sell_num"  property="sellNum" />
+    <result column="p_is_delete"  property="isDelete" />
+  </resultMap>
+
+    <select id="findPage" resultType="com.mall.params.resp.MallGoodsCommonResp" >
+        SELECT
+            common.p_sn AS sn,
+            common.p_name AS NAME,
+            common.p_jingle AS jingle,
+            common.p_category_id AS categoryId,
+            common.p_category_name AS categoryName,
+            common.p_brand_name AS brandName,
+            common.p_brand_id AS brandId,
+            common.p_type_id AS typeId,
+            common.p_image AS image,
+            common.p_common_desc AS commonDesc,
+            common.p_status AS STATUS,
+            common.p_freight AS freight,
+            common.p_is_vat AS isVat,
+            common.p_is_commend AS isCommend,
+            common.p_is_hot AS isHot,
+            common.p_region AS region,
+            common.p_region_id AS regionId,
+            common.p_create_time AS createTime,
+            common.p_sell_time AS sellTime,
+            common.p_guarantee AS guarantee,
+            common.p_unit AS unit,
+            common.p_remark AS remark,
+            common.p_sell_num as sellNum,
+            goods.p_price AS price,
+            goods.p_is_promotion AS isPromotion,
+            goods.p_promotion_price AS promotionPrice
+        FROM
+          t_mall_goods_common AS common
+        LEFT JOIN t_mall_goods AS goods ON common.p_sn = goods.p_goods_sn
+        WHERE
+            common.p_is_delete = 0
+            AND common.p_status = "TENTATIVE"
+            <if test="name != null">
+            AND common.p_name LIKE #{name}
+            </if>
+            <if test="brandName != null">
+            AND common.p_brand_name LIKE #{brandName}
+            </if>
+            <if test="isCommend != null">
+            AND common.p_is_commend = #{isCommend}
+            </if>
+            <if test="categoryId != null">
+            AND common.p_category_id = #{categoryId}
+            </if>
+            <if test="isHot != null">
+                AND common.p_is_hot = #{isHot}
+            </if>
+            <choose>
+            <when test="topPrice != null">
+            and goods.p_price between ${bottomPrice} and ${topPrice}
+            </when>
+            <when test="topPrice == null and bottomPrice != null">
+            and goods.p_price >= ${bottomPrice}
+            </when>
+            </choose>
+        ORDER BY
+            ${orderBy}
+            limit ${startLine}, ${pageSize}
+    </select>
+
+    <select id="findPageCount" resultType="java.lang.Integer">
+        SELECT
+          count(common.p_id)
+        FROM
+          t_mall_goods_common AS common
+        LEFT JOIN t_mall_goods AS goods ON common.p_sn = goods.p_goods_sn
+        WHERE
+            common.p_is_delete = 0
+            AND common.p_status = "TENTATIVE"
+            <if test="name != null">
+                AND common.p_name LIKE #{name}
+            </if>
+            <if test="brandName != null">
+                AND common.p_brand_name LIKE #{brandName}
+            </if>
+            <if test="isCommend != null">
+                AND common.p_is_commend = #{isCommend}
+            </if>
+            <if test="categoryId != null">
+                AND common.p_category_id = #{categoryId}
+            </if>
+            <if test="isHot != null">
+                AND common.p_is_hot = #{isHot}
+            </if>
+            <choose>
+                <when test="topPrice != null">
+                    and goods.p_price between ${bottomPrice} and ${topPrice}
+                </when>
+                <when test="topPrice == null and bottomPrice != null">
+                    and goods.p_price >= ${bottomPrice}
+                </when>
+            </choose>
+    </select>
+
+
+</mapper>

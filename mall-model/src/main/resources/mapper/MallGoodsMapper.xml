@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallGoodsMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallGoods">
+    <id column="p_id" property="id" />
+    <result column="p_goods_sn" property="goodsSn" />
+    <result column="p_code" property="code" />
+    <result column="p_name" property="name" />
+    <result column="p_bar_code" property="barCode" />
+    <result column="p_spec_ids" property="specIds" />
+    <result column="p_spec_codes" property="specCodes" />
+    <result column="p_spec_values" property="specValues" />
+    <result column="p_market_price" property="marketPrice" />
+    <result column="p_cost_price" property="costPrice" />
+    <result column="p_price" property="price" />
+    <result column="p_is_promotion" property="isPromotion" />
+    <result column="p_promotion_price" property="promotionPrice" />
+    <result column="p_promotion_type" property="promotionType" />
+    <result column="p_promotion_start" property="promotionStart" />
+    <result column="p_promotion_end" property="promotionEnd" />
+    <result column="p_limit_num" property="limitNum" />
+    <result column="p_create_time" property="createTime" />
+    <result column="p_update_time" property="updateTime" />
+    <result column="p_permission_code" property="permissionCode" />
+    <result column="p_remark" property="remark" />
+    <result column="p_stock_num" property="stockNum"/>
+    <result column="p_is_delete" property="isDelete"/>
+    <result column="p_sell_num"  property="sellNum" />
+    <result column="p_device_type_id"  property="deviceTypeId" />
+    <result column="p_device_type_name"  property="deviceTypeName" />
+    <result column="p_factory_id"  property="factoryId" />
+    <result column="p_factory_name"  property="factoryName" />
+  </resultMap>
+
+
+</mapper>

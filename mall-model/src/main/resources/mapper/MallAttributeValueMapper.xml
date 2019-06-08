@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallAttributeValueMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallAttributeValue">
+    <id column="p_id"  property="id" />
+    <result column="p_name"  property="name" />
+    <result column="p_code"  property="code" />
+    <result column="p_attr_id"  property="attrId" />
+    <result column="p_type_id"  property="typeId" />
+    <result column="p_sort"  property="sort" />
+  </resultMap>
+
+  <update id="updateMallAttributeValueByAttrId">
+    update t_mall_attribute_value set p_attr_id = null where p_attr_id = #{attrId}
+  </update>
+
+  <update id="updateMallAttributeValueByTypeId">
+    update t_mall_attribute_value set p_type_id = null where p_attr_id = #{typeId}
+  </update>
+
+</mapper>

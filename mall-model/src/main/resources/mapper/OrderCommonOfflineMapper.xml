@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.OrderCommonOffLineMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.OrderCommonOffLine">
+        <id column="p_id"  property="id" />
+        <id column="p_member_id"  property="memberId" />
+        <result column="p_order_sn"  property="orderSn" />
+        <result column="p_trade_no"  property="tradeNo" />
+        <result column="p_pay_type"  property="payType" />
+        <result column="p_pay_time"  property="payTime" />
+        <result column="p_finished_time"  property="finishedTime" />
+        <result column="p_amount"  property="amount" />
+        <result column="p_order_amount"  property="orderAmount" />
+        <result column="p_discount_amount"  property="discountAmount" />
+        <result column="p_is_account"  property="isAccount" />
+        <result column="p_account_amount"  property="accountAmount" />
+        <result column="p_integral"  property="integral" />
+        <result column="p_ship_fee"  property="shipFee" />
+        <result column="p_country"  property="country" />
+        <result column="p_province"  property="province" />
+        <result column="p_city"  property="city" />
+        <result column="p_district"  property="district" />
+        <result column="p_school_name"  property="schoolName" />
+        <result column="p_school_id"  property="schoolId" />
+        <result column="p_dorm_name"  property="dormName" />
+        <result column="p_dorm_id"  property="dormId" />
+        <result column="p_address"  property="address" />
+        <result column="p_ship_time"  property="shipTime" />
+        <result column="p_status"  property="status" />
+        <result column="p_refund_status"  property="refundStatus" />
+        <result column="p_is_delete" property="isDelete" />
+        <result column="p_invoice_no"  property="invoiceNo" />
+        <result column="p_message"  property="message" />
+        <result column="p_to_buyer"  property="toBuyer" />
+        <result column="p_points_count"  property="pointsCount" />
+        <result column="p_coupon_code"  property="couponCode" />
+        <result column="p_coupon_price"  property="couponPrice" />
+        <result column="p_inv_payee"  property="invPayee" />
+        <result column="p_inv_content"  property="invContent" />
+        <result column="p_inv_type"  property="invType" />
+        <result column="p_promotion_remark"  property="promotionRemark" />
+        <result column="p_remark"  property="remark" />
+        <result column="p_create_time"  property="createTime" />
+        <result column="p_phone_num"  property="phoneNum" />
+        <result column="p_receiver_name"  property="receiverName" />
+    </resultMap>
+
+    <select id="findMerchantOrderList" resultMap="BaseResultMap">
+        SELECT orderCommon.* FROM t_user_info userInfo
+        JOIN t_account account ON account.p_uid=userInfo.p_uid
+        JOIN t_account_bill_offline accountBill ON accountBill.p_account_id
+        JOIN t_order_common_offline orderCommon ON orderCommon.p_order_sn=accountBill.p_order_sn
+        <where>
+            <if test="userId != null">
+                userInfo.p_uid=#{userId}
+            </if>
+            <if test="status != null">
+                AND orderCommon.p_status=#{status}
+            </if>
+            <if test="isDelete != null">
+                AND orderCommon.p_is_delete=#{isDelete}
+            </if>
+        </where>
+        ORDER BY orderCommon.p_create_time DESC
+    </select>
+  
+
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.AccountMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.Account">
+    <id column="p_id"  property="id" />
+    <result column="p_aid" property="aid" />
+    <result column="p_uid"  property="uid" />
+    <result column="p_id_card_z"  property="idCardZ" />
+    <result column="p_id_card_f"  property="idCardF" />
+    <result column="p_license_url" property="licenseUrl" />
+    <result column="p_region_id"  property="regionId" />
+    <result column="p_region"  property="region" />
+    <result column="p_contract_num"  property="contractNum" />
+    <result column="p_contract_img"  property="contractImg" />
+    <result column="p_money"  property="money" />
+    <result column="p_forzen_money" property="forzenMoney" />
+    <result column="p_all_amount"  property="allAmount" />
+    <result column="p_rank_points"  property="rankPoints" />
+    <result column="p_credit"  property="credit" />
+    <result column="p_credit_used"  property="creditUsed" />
+    <result column="p_status" property="status" />
+    <result column="p_create_time"  property="createTime" />
+    <result column="p_update_time"  property="updateTime" />
+    <result column="p_remark"  property="remark" />
+    <result column="p_version"  property="version" />
+  </resultMap>
+
+  <select id="findByNameOrPhoneOrEmail" resultType="com.mall.params.resp.UserAccountInfo">
+    SELECT
+    userInfo.p_name name,userInfo.p_phone phone,userInfo.p_email email,
+    account.p_id id,account.p_aid,account.p_uid uid,account.p_id_card_z idCardZ,
+    account.p_id_card_f idCardF,account.p_license_url licenseUrl,account.p_region_id regionId,
+    account.p_region region,account.p_contract_num contractNum,account.p_contract_img contractImg,
+    account.p_money money,account.p_forzen_money forzenMoney,account.p_all_amount allAmount,
+    account.p_rank_points rankPoints,account.p_credit credit,account.p_credit_used creditUsed,
+    account.p_status status,account.p_create_time createTime,account.p_update_time updateTime,
+    account.p_remark remark,account.p_version version
+    FROM t_user users
+    JOIN t_user_info userInfo ON userInfo.p_id=users.p_userinfo_id
+    JOIN t_account account ON account.p_uid=users.p_uid
+    <where>
+      <if test="name != null and name != ''">
+        userInfo.p_name LIKE CONCAT('%',#{name},'%')
+      </if>
+      <if test="phone != null and phone != ''">
+        OR userInfo.p_phone LIKE CONCAT('%',#{phone},'%')
+      </if>
+      <if test="email != null and email != ''">
+        OR userInfo.p_email LIKE CONCAT('%',#{email},'%')
+      </if>
+      <if test="status != null">
+          AND account.p_status=#{status}
+      </if>
+      AND userInfo.p_parent_uid=#{userId}
+    </where>
+    ORDER BY account.p_update_time DESC
+  </select>
+
+
+</mapper>

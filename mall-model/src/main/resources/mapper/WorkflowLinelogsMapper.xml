@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.WorkflowLineLogsMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.WorkflowLineLogs">
+        <id column="p_id" property="id"/>
+        <result column="p_example_id" property="exampleId"/>
+        <result column="p_example_name" property="exampleName"/>
+        <result column="p_wf_id" property="wfid"/>
+        <result column="p_condition" property="pCondition"/>
+        <result column="p_node_id" property="nodeId"/>
+        <result column="p_user_id" property="userId"/>
+        <result column="p_user_name" property="userName"/>
+        <result column="p_action" property="action"/>
+        <result column="p_status" property="status"/>
+        <result column="p_handler_users" property="handlerUsers"/>
+        <result column="p_create_time" property="createTime"/>
+    </resultMap>
+
+
+    <select id="findUserNoDealLogs" resultMap="BaseResultMap">
+        SELECT
+        workflow_example.p_name exampleName,
+        workflow_line_logs.p_id,workflow_line_logs.p_example_id exampleId,workflow_line_logs.p_wf_id wfid,
+        workflow_line_logs.p_condition pCondition,workflow_line_logs.p_node_id,workflow_line_logs.p_user_id userId,
+        workflow_line_logs.p_user_name userName,workflow_line_logs.p_action action,workflow_line_logs.p_status status,
+        workflow_line_logs.p_handler_users handlerUsers,workflow_line_logs.p_create_time createTime
+        FROM t_workflow_line_logs workflow_line_logs
+        JOIN t_workflow_example workflow_example ON workflow_example.p_id=workflow_line_logs.p_example_id
+        <where>
+            workflow_line_logs.p_handler_users  LIKE CONCAT('%',#{userId},'%')
+            AND workflow_line_logs.p_status in
+            <foreach collection="statusList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+        ORDER BY workflow_line_logs.p_create_time DESC
+    </select>
+
+
+
+</mapper>

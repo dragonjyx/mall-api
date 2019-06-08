@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.MallGoodsGalleryMapper">
+  <resultMap id="BaseResultMap" type="com.mall.model.MallGoodsGallery">
+    <id column="p_id" property="id" />
+    <result column="p_goods_sn"  property="goodsSn" />
+    <result column="p_img_url"  property="imgUrl" />
+    <result column="p_img_desc"  property="imgDesc" />
+    <result column="p_thumb_url"  property="thumbUrl" />
+    <result column="p_img_original"  property="imgOriginal" />
+  </resultMap>
+
+</mapper>
