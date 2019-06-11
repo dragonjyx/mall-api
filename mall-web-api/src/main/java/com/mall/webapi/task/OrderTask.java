@@ -67,6 +67,7 @@ public class OrderTask extends QuartzJobBean {
                         throw new ServiceException(mallGoods.getName() + "库存异常");
                     }
 
+                    mallGoods.setStockNum(stockNum);
                     int result = mallGoodsDao.updateByCode(mallGoods);
                     if(result != 1){
                         throw new ServiceException(mallGoods.getName() + "库存添加，更新失败");

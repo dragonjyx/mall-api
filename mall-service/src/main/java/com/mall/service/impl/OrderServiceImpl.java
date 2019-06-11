@@ -117,6 +117,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 //                mallGoodsList.add(mallGoods);
 
+                mallGoods.setStockNum(stockNum);
                 int result = mallGoodsDao.updateByCode(mallGoods);
                 if(result != 1){
                     log.error(mallGoods.getName() + "库存减少，更新失败");
@@ -248,6 +249,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 //                mallGoodsList.add(mallGoods);
 
+                mallGoods.setStockNum(stockNum);
                 int result = mallGoodsDao.updateByCode(mallGoods);
                 if(result != 1){
                     throw new ServiceException(mallGoods.getName() + "库存减少，更新失败");
