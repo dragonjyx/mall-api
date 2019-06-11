@@ -66,4 +66,6 @@ public interface OrderService {
     PageInfo<OrderCommon> merchantOrderListPage(PageCondition condition, Integer status, String userId);
 
     PageInfo<OrderCommonOffLine> merchantOrderOfflineListPage(PageCondition condition, Integer status, String userId);
+
+    PageInfo<OrderCommonOffLine> testOfflineOrderListPage(PageCondition condition);
 }

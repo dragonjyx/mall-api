@@ -68,4 +68,10 @@ public class OrderCommonOffLineDao {
         List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineMapper.selectByExample(example);
         return orderCommonOffLineList;
     }
+
+    public List<OrderCommonOffLine> findOrderList() {
+        Example example = new Example(OrderCommonOffLine.class);
+        List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineMapper.selectByExample(example);
+        return orderCommonOffLineList;
+    }
 }

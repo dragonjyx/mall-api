@@ -128,7 +128,28 @@ public class MerchantController extends BaseController {
 
 
 
+    @ResponseBody
+    @RequestMapping(value = "test/offline-order-list",method = RequestMethod.POST)
+    public JsonResult testOfflineOrderList(HttpServletRequest request, @RequestBody JSONObject params){
+        log.warn("供货商线下订单查询:{}",params.toJSONString());
+        Long status = params.getLong("status");
 
+        Integer pageSize    = params.getInteger("pageSize");
+        Integer currentPage = params.getInteger("currentPage");
+        if(currentPage == null){
+            currentPage = 0;
+        }
+        if(pageSize == null){
+            pageSize = 20;
+        }
+        PageCondition condition = new PageCondition();
+        condition.setCurrentPage(currentPage);
+        condition.setPageSize(pageSize);
+
+        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.testOfflineOrderListPage(condition);
+        log.warn("orderCommonPageInfo:{}",orderCommonOffLinePageInfo.toString());
+        return JsonResult.success(orderCommonOffLinePageInfo);
+    }
 
 
 

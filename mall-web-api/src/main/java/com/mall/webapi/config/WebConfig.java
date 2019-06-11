@@ -37,6 +37,7 @@ public class WebConfig extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/js/**")
                 .excludePathPatterns("/css/**")
                 .excludePathPatterns("/wechat/mp/**")
+                .excludePathPatterns("/merchant/test/offline-order-list")
                 .excludePathPatterns("/user/check-login")
                 .excludePathPatterns("/member/check-login");
         super.addInterceptors(registry);

@@ -938,4 +938,12 @@ public class OrderServiceImpl implements OrderService {
         PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
         return orderCommonOffLinePageInfo;
     }
+
+    @Override
+    public PageInfo<OrderCommonOffLine> testOfflineOrderListPage(PageCondition condition) {
+        PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
+        List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineDao.findOrderList();
+        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
+        return orderCommonOffLinePageInfo;
+    }
 }
