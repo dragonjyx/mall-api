@@ -42,5 +42,7 @@ public interface AccountService {
 
     Account findByUserId(String userId);
 
-    int widthdrawMoney(Account account, BigDecimal widthdrawAmount);
+    int widthdrawMoney(Account account, String orderSn);
+
+    int generateAccountBill(AccountBill accountBill);
 }

@@ -85,7 +85,7 @@ public class WXPay {
     public Map<String, String> fillRequestData(Map<String, String> reqData) throws Exception {
         reqData.put("appid", config.getAppID());
         reqData.put("mch_id", config.getMchID());
-        reqData.put("nonce_str", WXPayUtil.generateNonceStr());
+//        reqData.put("nonce_str", WXPayUtil.generateNonceStr());
         if (WXPayConstants.SignType.MD5.equals(this.signType)) {
             reqData.put("sign_type", WXPayConstants.MD5);
         }
@@ -95,6 +95,27 @@ public class WXPay {
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
         return reqData;
     }
+
+    /**
+     * 用于企业付款
+     * @param reqData
+     * @return
+     * @throws Exception
+     */
+    public Map<String, String> fillWidhdrawRequestData(Map<String, String> reqData) throws Exception {
+        reqData.put("mch_appid", config.getAppID());
+        reqData.put("mch_id", config.getMchID());
+//        reqData.put("nonce_str", WXPayUtil.generateNonceStr());
+        if (WXPayConstants.SignType.MD5.equals(this.signType)) {
+            reqData.put("sign_type", WXPayConstants.MD5);
+        }
+        else if (WXPayConstants.SignType.HMACSHA256.equals(this.signType)) {
+            reqData.put("sign_type", WXPayConstants.HMACSHA256);
+        }
+        reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
+        return reqData;
+    }
+
 
     /**
      * 判断xml数据的sign是否有效，必须包含sign字段，否则返回false。
@@ -683,6 +704,14 @@ public class WXPay {
         String respXml = this.requestWithoutCert(url, this.fillRequestData(reqData), connectTimeoutMs, readTimeoutMs);
         return this.processResponseXml(respXml);
     }
+
+
+    public Map<String,String> widthdraw(Map<String,String> reqData) throws Exception {
+        String url = WXPayConstants.QIYEFUKUAN_SUFFIX;
+        String respXml = this.requestWithCert(url, this.fillWidhdrawRequestData(reqData), this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
+        return this.processResponseXml(respXml);
+    }
+
 
 
 } // end class

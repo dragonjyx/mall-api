@@ -4,13 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.java.redis.util.UniqueIdGenerate;
 import com.java.response.JsonResult;
 import com.java.utils.date.DateUtils;
-import com.mall.model.Account;
-import com.mall.model.OrderCommon;
-import com.mall.model.UnionIds;
-import com.mall.model.User;
-import com.mall.params.status.OrderStatus;
-import com.mall.params.status.PayType;
-import com.mall.params.status.RefundStatus;
+import com.mall.model.*;
+import com.mall.params.status.*;
 import com.mall.service.*;
 import com.mall.webapi.controller.BaseController;
 import com.mall.webapi.controller.pay.wechat.IWxPayConfig;
@@ -18,6 +13,7 @@ import com.mall.webapi.controller.pay.wechat.WXPay;
 import com.mall.webapi.controller.pay.wechat.WXPayUtil;
 import com.mall.webapi.controller.pay.wechat.WechatUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,11 +60,14 @@ public class WechatPayController extends BaseController {
     @Value("${wechat.mp_appsecret}")
     private String WX_MP_APP_SECRECT;//公众号 服务号的应用密码
 
-    @Value("${wechat.pay_token}")
+    @Value("${wechat.wx_token}")
     private String WX_TOKEN;//服务号的配置token
 
     @Value("${wechat.mch_id}")
     private String WX_MCH_ID;//商户号
+
+    @Value("${wechat.mch_appid}")
+    private String MCH_APP_ID;//商户号appid
 
     @Value("${wechat.api_key}")
     private String WX_API_KEY;//API密钥
@@ -118,7 +117,6 @@ public class WechatPayController extends BaseController {
     @ResponseBody
     @RequestMapping(value = "pay",method = RequestMethod.POST)
     public JsonResult wechatPay(HttpServletRequest request, @RequestBody JSONObject params){
-
         String orderSn = params.getString("orderSn");
         if(StringUtils.isEmpty(orderSn)){
             return JsonResult.fail("请提交订单信息");
@@ -146,10 +144,11 @@ public class WechatPayController extends BaseController {
 
 
         //2.调用微信统一下单
+        String nonceStr = WechatUtils.createNoncestr();
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("appid", WX_XCX_APPID); // APPid
         parameters.put("mch_id", WX_MCH_ID); // 商户id
-        parameters.put("nonce_str", WechatUtils.createNoncestr());
+        parameters.put("nonce_str",nonceStr);
         parameters.put("body", body);
         parameters.put("out_trade_no", out_trade_no);//商户订单号
         parameters.put("total_fee", total_amount+"");//订单总金额，单位为分
@@ -188,7 +187,18 @@ public class WechatPayController extends BaseController {
 
         //String sign = response.get("sign");
 
-        return JsonResult.success("支付下单成功，等待输入支付密码");
+
+        long timeStamp = new Date().getTime()/1000;
+        //返回给小程序
+        JSONObject payRequest = new JSONObject();
+        payRequest.put("appId",this.WX_XCX_APPID);
+        payRequest.put("timeStamp",timeStamp);
+        payRequest.put("nonceStr",nonceStr);
+        payRequest.put("package","prepay_id="+prepay_id);
+        payRequest.put("signType",this.WX_SIGN_TYPE);
+
+
+        return JsonResult.success(payRequest);
     }
 
 
@@ -314,7 +324,6 @@ public class WechatPayController extends BaseController {
 
 
 
-
     /**
      * 退款
      * @param request
@@ -364,8 +373,6 @@ public class WechatPayController extends BaseController {
 
         try {
             Map<String, String> response = wxPay.refund(parameters);
-
-
             String returnCode = response.get("return_code");
             if (!SUCCESS.equals(returnCode)) {
                 return JsonResult.fail("退款失败");
@@ -430,29 +437,79 @@ public class WechatPayController extends BaseController {
             return JsonResult.fail("账户余额不足");
         }
 
-
-        //微信请求企业付款
-
-
-
+        Integer widthdrawMoney = widthdrawAmount.multiply(new BigDecimal(100)).intValue();
+        String body = userId + "申请付款" + widthdrawAmount.toString() + "元";
+        String ip = WX_IP;
 
 
+        try {
+            wxPay = new WXPay(new IWxPayConfig(this.WX_XCX_APPID,this.WX_API_KEY,this.WX_MCH_ID,WX_CERT_PATH));
+        } catch (Exception e) {
+            log.error("wxPay 异常：",e);
+        }
+        String tradeNo = UniqueIdGenerate.getSnowflakeId(TRADE_NO_KEY,32);
 
-
-        //生成提现账单，并且修改账单金额
-        BigDecimal leftMoeny = money.subtract(widthdrawAmount);
-        account.setMoney(leftMoeny);
-        account.setUpdateTime(new Date());
-        int result = accountService.widthdrawMoney(account,widthdrawAmount);
-
-        if(result !=1){
-            return JsonResult.fail("提现失败");
+        AccountBill accountBill = new AccountBill();
+        accountBill.setAccountId(account.getAid());
+        accountBill.setAmount(widthdrawAmount);
+        accountBill.setBillStatus(BillStatus.INIT.value);
+        accountBill.setCreateTime(new Date());
+        accountBill.setIsDelete(false);
+        accountBill.setStatus(AccountBillStatus.FREE.value);
+        accountBill.setType(AccountBillType.WIDTHDRAW.value);
+        accountBill.setUpdateTime(new Date());
+        accountBill.setOrderSn(tradeNo);
+        //生成体现记录账单
+        int result = accountService.generateAccountBill(accountBill);
+        if(result != 1){
+            return JsonResult.fail("生成体现账单失败");
         }
 
-        return JsonResult.success("提现成功");
+
+        //微信请求企业付款
+        String nonceStr = WechatUtils.createNoncestr();
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("mch_appid",this.MCH_APP_ID);
+        parameters.put("mchid",this.WX_MCH_ID);
+        parameters.put("nonce_str",nonceStr);
+        parameters.put("partner_trade_no",tradeNo);
+        parameters.put("openid",openId);
+        parameters.put("check_name","NO_CHECK");
+        parameters.put("amount",widthdrawMoney+"");
+        parameters.put("desc",body+"");
+        parameters.put("spbill_create_ip",ip);
+
+        try {
+            Map<String, String> response = wxPay.widthdraw(parameters);
+
+            String returnCode = response.get("return_code");
+            if (!SUCCESS.equals(returnCode)) {
+                return JsonResult.fail("企业付款失败");
+            }
+            String resultCode = response.get("result_code");
+            if (!SUCCESS.equals(resultCode)) {
+                return JsonResult.fail("企业付款失败");
+            }
+
+            String partner_trade_no = response.get("partner_trade_no");
+//            String payment_no       = response.get("payment_no");
+
+
+            //生成提现账单，并且修改账单金额
+            BigDecimal leftMoeny = money.subtract(widthdrawAmount);
+            account.setMoney(leftMoeny);
+            account.setUpdateTime(new Date());
+            result = accountService.widthdrawMoney(account,partner_trade_no);
+
+            if(result !=1){
+                return JsonResult.fail("提现成功，提现扣款失败");
+            }
+
+            return JsonResult.success("提现成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("企业付款失败:",e);
+            return JsonResult.fail("提现失败");
+        }
     }
-
-
-
-
 }

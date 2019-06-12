@@ -29,7 +29,7 @@ public class AccountBill {
     private Integer type;// 0:入账 1：提现
 
     @Column(name="p_order_sn")
-    private String orderSn;
+    private String orderSn;//体现的时候为流水号
 
     @Column(name="p_status")
     private Integer status;//0：冻结 1：解冻 2：取消
@@ -47,5 +47,5 @@ public class AccountBill {
     private Date updateTime;
 
     @Column(name="p_bill_status")
-    private Integer billStatus;//0:失败 1：正常
+    private Integer billStatus;//0:初始化 1：正常 2：失败
 }

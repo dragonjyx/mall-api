@@ -1,7 +1,11 @@
 package com.mall.webapi;
 
-import com.java.utils.code.AES_CBC_PKCS7;
-import com.java.utils.code.Base64Util;
+import com.mall.webapi.controller.pay.wechat.WXPayUtil;
+import com.mall.webapi.controller.pay.wechat.WechatUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class PriceCount {
 
@@ -30,6 +34,7 @@ public class PriceCount {
          */
 
 
+        /*
         String encryptedData = "sW2Wm1naQNXCvgH4fKdu32QCKhZ7suDqjmI7zD2piToOMe6Sq3bC9k2N9rdkrKQZuxncO1f3slLK4AFsgoiBtYyZz/LhO4SfO5xnNyjLRwmk682mC3nOQhsS0GXGp3I/K6vElZgRXvW96yoKe27IsBGyEV2sFjK+dSKj5OHYXIiefk3w2nXYubR5tijpr41DQntl616y8DAt+5BhkIbDu+U7wJ+WKtA310JwJN1twmS1TB1I4G4eMlHKvh5qu5JDIOzxM5ViQXEEDu/afqABzXvRsSNePUtYGVoU+4RB5yf32PwfLjnkiUUsb9U2CgGtuNClzMHMA+1zA2HMK8El/ovjLs5eL5bgtsV2NhulmD3dWs5uvIo2FO3JyuEAyYFw/+pRXdw2ufk86EJJS3DKTojltKOlcu0D9Cqm3GXvGvTPbJtjSRJ4jIYcdhJWraWPMl/ni6+nU9BWla+XU+F0jcxxf4a7VRHpUBpIqAjyGj4=";
         String iv = "HYOHet0OsnOTS7LNrttnaA==";
         String sessionKey = "8qELTx9hKL6KxUJRm78seA==";
@@ -44,9 +49,25 @@ public class PriceCount {
 
         System.out.println("content: "+new String(descryptBytes));
 
+        long timeStamp = new Date().getTime();
+        System.out.println(timeStamp);
+        System.out.println(timeStamp/1000);
+        */
+
+        String nonceStr = WechatUtils.createNoncestr();
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("mch_appid","ew6trry");
+        parameters.put("mchid","4565478ufg");
+        parameters.put("nonce_str",nonceStr);
+        parameters.put("partner_trade_no","46457547");
 
 
-
+        try {
+            String xml = WXPayUtil.mapToXml(parameters);
+            System.out.println(xml);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

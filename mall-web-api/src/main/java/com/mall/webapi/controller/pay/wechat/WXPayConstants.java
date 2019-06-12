@@ -42,6 +42,9 @@ public class WXPayConstants {
     public static final String SHORTURL_URL_SUFFIX     = "/tools/shorturl";
     public static final String AUTHCODETOOPENID_URL_SUFFIX = "/tools/authcodetoopenid";
 
+
+    public static final String QIYEFUKUAN_SUFFIX = "/mmpaymkttransfers/promotion/transfers";
+
     // sandbox
     public static final String SANDBOX_MICROPAY_URL_SUFFIX     = "/sandboxnew/pay/micropay";
     public static final String SANDBOX_UNIFIEDORDER_URL_SUFFIX = "/sandboxnew/pay/unifiedorder";

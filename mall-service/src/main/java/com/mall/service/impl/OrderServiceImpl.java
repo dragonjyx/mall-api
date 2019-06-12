@@ -847,7 +847,6 @@ public class OrderServiceImpl implements OrderService {
         List<AccountBill> accountBillList = accountBillDao.findByOrderSn(orderCommon.getOrderSn());
         for(AccountBill accountBill:accountBillList){
             accountBill.setStatus(AccountBillStatus.CANCEL.value);
-            accountBill.setBillStatus(AccountBillStatus.CANCEL.value);
             accountBill.setUpdateTime(now);
             int reuslt = accountBillDao.updateAccountBill(accountBill);
             if(reuslt != 1){

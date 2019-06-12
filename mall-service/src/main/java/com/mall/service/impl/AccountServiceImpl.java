@@ -12,10 +12,12 @@ import com.mall.params.resp.UserAccountInfo;
 import com.mall.params.status.AccountBillStatus;
 import com.mall.params.status.AccountBillType;
 import com.mall.params.status.AccountStatus;
+import com.mall.params.status.BillStatus;
 import com.mall.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -172,29 +174,32 @@ public class AccountServiceImpl implements AccountService {
         return result;
     }
 
+    @Transactional
     @Override
-    public int widthdrawMoney(Account account, BigDecimal widthdrawAmount) {
-        AccountBill accountBill = new AccountBill();
-        accountBill.setAccountId(account.getAid());
-        accountBill.setType(AccountBillType.WIDTHDRAW.value);
-        accountBill.setOrderSn(null);
+    public int widthdrawMoney(Account account, String orderSn) {
+        List<AccountBill> accountBillList =  accountBillDao.findByOrderSn(orderSn);
+        if(accountBillList.isEmpty()){
+            throw new ServiceException("提现账单查询失败");
+        }
+        AccountBill accountBill = accountBillList.get(0);
         accountBill.setStatus(AccountBillStatus.UNFREE.value);
-        accountBill.setAmount(widthdrawAmount);
-        accountBill.setIsDelete(Boolean.FALSE);
-        accountBill.setCreateTime(account.getUpdateTime());
         accountBill.setUpdateTime(account.getUpdateTime());
-        accountBill.setBillStatus(AccountBillStatus.FREE.value);
+        accountBill.setBillStatus(BillStatus.SUCCESS.value);
         int result = accountBillDao.addAccountBill(accountBill);
 
         if(result != 1){
-            throw new ServiceException("生成提现账单失败");
+            throw new ServiceException("修改提现账单失败");
         }
-
         result = accountDao.updateAccount(account);
         if(result != 1){
             throw new ServiceException("更新账户余额失败");
         }
-
         return 1;
+    }
+
+    @Override
+    public int generateAccountBill(AccountBill accountBill) {
+        int result = accountBillDao.addAccountBill(accountBill);
+        return result;
     }
 }

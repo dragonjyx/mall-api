@@ -7,6 +7,7 @@ import com.mall.dao.UserSchoolDormDao;
 import com.mall.model.Account;
 import com.mall.model.AccountBill;
 import com.mall.params.status.AccountBillStatus;
+import com.mall.params.status.BillStatus;
 import com.mall.service.AccountService;
 import com.mall.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,7 @@ public class ShareTask extends QuartzJobBean {
             }
 
             accountBill.setStatus(AccountBillStatus.UNFREE.value);
-            accountBill.setBillStatus(AccountBillStatus.UNFREE.value);
+            accountBill.setBillStatus(BillStatus.SUCCESS.value);
             accountBill.setUpdateTime(now);
 
             result = accountService.updateAccountBill(accountBill);
