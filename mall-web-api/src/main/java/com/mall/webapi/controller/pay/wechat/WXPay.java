@@ -1,9 +1,13 @@
 package com.mall.webapi.controller.pay.wechat;
 
 
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class WXPay {
 
     private WXPayConfig config;
@@ -93,6 +97,10 @@ public class WXPay {
             reqData.put("sign_type", WXPayConstants.HMACSHA256);
         }
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
+
+        log.warn("-------------------------reqData-------------------------------");
+        log.warn("{}",JSONObject.toJSONString(reqData));
+        log.warn("-------------------------reqData-------------------------------");
         return reqData;
     }
 

@@ -36,6 +36,7 @@ public class WebConfig extends WebMvcConfigurationSupport {
                 .excludePathPatterns("/error")//一定要加上去
                 .excludePathPatterns("/js/**")
                 .excludePathPatterns("/css/**")
+                .excludePathPatterns("/wechat/**")
                 .excludePathPatterns("/wechat/mp/**")
                 .excludePathPatterns("/merchant/test/offline-order-list")
                 .excludePathPatterns("/user/check-login")

@@ -3,6 +3,7 @@ package com.mall.webapi;
 import com.mall.webapi.controller.pay.wechat.WXPayUtil;
 import com.mall.webapi.controller.pay.wechat.WechatUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,17 +55,21 @@ public class PriceCount {
         System.out.println(timeStamp/1000);
         */
 
+        Long timeStamp = new Date().getTime();
+        System.out.println(timeStamp);
+        System.out.println(timeStamp/1000);
         String nonceStr = WechatUtils.createNoncestr();
-        Map<String, String> parameters = new HashMap<String, String>();
+
+        Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("mch_appid","ew6trry");
         parameters.put("mchid","4565478ufg");
+        parameters.put("timeStamp",timeStamp);
         parameters.put("nonce_str",nonceStr);
         parameters.put("partner_trade_no","46457547");
 
 
         try {
-            String xml = WXPayUtil.mapToXml(parameters);
-            System.out.println(xml);
+//            String paySign = WXPayUtil.generateSignature(parameters,"345436456745");
         } catch (Exception e) {
             e.printStackTrace();
         }

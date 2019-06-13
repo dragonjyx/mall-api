@@ -899,6 +899,47 @@ public class OrderServiceImpl implements OrderService {
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
         }
+
+        //============================分润账单========================
+        Long dormId = orderCommon.getDormId();
+        //1、配送员分润
+        BigDecimal shipFee = orderCommon.getShipFee();
+        orderCommon.setShareShipFee(shipFee);//运费
+
+        //2、供应商分润
+        BigDecimal totalCostPrice = new BigDecimal(0);
+        List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderCommon.getOrderSn());
+        if(!orderGoodsList.isEmpty()){
+            for(OrderGoods orderGoods:orderGoodsList){
+                String goodsCode = orderGoods.getGoodsCode();
+                String goodsSn = orderGoods.getGoodsSn();
+                Integer num = orderGoods.getNum();//购买数量
+                MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
+                if(mallGoods != null){
+                    BigDecimal costPrice = mallGoods.getCostPrice();
+                    totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
+                }
+            }
+        }
+        orderCommon.setShareMerchantFee(totalCostPrice);//供应商
+
+        //3、楼长分润
+        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+        if(userSchoolDorm != null){
+            String userId = userSchoolDorm.getUserId();
+            UserInfo userInfo = userInfoDao.findByUserId(userId);
+
+            if(userInfo != null){
+                BigDecimal amount = orderCommon.getAmount();//订单总额
+                BigDecimal bigDecimal = userInfo.getDistributionRatio();
+                if(bigDecimal != null){
+                    BigDecimal userAmount = amount.multiply(bigDecimal);//代理商分润
+                    orderCommon.setShareUserAmount(userAmount);//楼长
+                }
+            }
+        }
+
+
         return orderCommon;
     }
 
@@ -909,6 +950,48 @@ public class OrderServiceImpl implements OrderService {
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommonOffLine.setOrderGoodsList(orderGoodsList);
         }
+        //账单分润
+        //============================生成分润账单========================
+        Long dormId = orderCommonOffLine.getDormId();
+
+        //1、配送员分润
+        BigDecimal shipFee = orderCommonOffLine.getShipFee();
+        orderCommonOffLine.setShareShipFee(shipFee);
+
+        //2、供应商分润
+        BigDecimal totalCostPrice = new BigDecimal(0);
+        List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderCommonOffLine.getOrderSn());
+        if(!orderGoodsList.isEmpty()){
+            for(OrderGoods orderGoods:orderGoodsList){
+                String goodsCode = orderGoods.getGoodsCode();
+                String goodsSn = orderGoods.getGoodsSn();
+                Integer num = orderGoods.getNum();//购买数量
+                MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
+                if(mallGoods != null){
+                    BigDecimal costPrice = mallGoods.getCostPrice();
+                    totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
+                }
+            }
+        }
+        orderCommonOffLine.setShareMerchantFee(totalCostPrice);
+
+
+        //3、楼长分润
+        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+        if(userSchoolDorm != null){
+            String userId = userSchoolDorm.getUserId();
+            UserInfo userInfo = userInfoDao.findByUserId(userId);
+
+            if(userInfo != null){
+                BigDecimal amount = orderCommonOffLine.getAmount();//订单总额
+                BigDecimal bigDecimal = userInfo.getDistributionRatio();
+                if(bigDecimal != null){
+                    BigDecimal userAmount = amount.multiply(bigDecimal);//代理商分润
+                    orderCommonOffLine.setShareUserAmount(userAmount);
+                }
+            }
+        }
+
         return orderCommonOffLine;
     }
 

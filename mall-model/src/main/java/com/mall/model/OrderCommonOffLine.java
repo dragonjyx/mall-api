@@ -146,4 +146,14 @@ public class OrderCommonOffLine {
     @Transient
     private List<OrderGoods> orderGoodsList;//订单商品
 
+    @Transient
+    private BigDecimal shareShipFee;//运费
+
+    @Transient
+    private BigDecimal shareMerchantFee;//供应商
+
+    @Transient
+    private BigDecimal shareUserAmount;//楼长
+
+
 }

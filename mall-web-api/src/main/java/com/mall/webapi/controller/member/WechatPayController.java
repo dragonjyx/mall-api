@@ -3,6 +3,7 @@ package com.mall.webapi.controller.member;
 import com.alibaba.fastjson.JSONObject;
 import com.java.redis.util.UniqueIdGenerate;
 import com.java.response.JsonResult;
+import com.java.utils.code.MD5Util;
 import com.java.utils.date.DateUtils;
 import com.mall.model.*;
 import com.mall.params.status.*;
@@ -91,7 +92,7 @@ public class WechatPayController extends BaseController {
     private int order_share_day;
 
     //微信支付类型
-    private String trade_type="NATIVE" ;
+    private String trade_type="JSAPI" ;
 
     private String SUCCESS="SUCCESS" ;
 
@@ -117,6 +118,10 @@ public class WechatPayController extends BaseController {
     @ResponseBody
     @RequestMapping(value = "pay",method = RequestMethod.POST)
     public JsonResult wechatPay(HttpServletRequest request, @RequestBody JSONObject params){
+
+        String token  = request.getParameter("token");
+        String openId = getOpenId(token);
+
         String orderSn = params.getString("orderSn");
         if(StringUtils.isEmpty(orderSn)){
             return JsonResult.fail("请提交订单信息");
@@ -145,9 +150,11 @@ public class WechatPayController extends BaseController {
 
         //2.调用微信统一下单
         String nonceStr = WechatUtils.createNoncestr();
+        log.warn("生成nonceStr:{}",nonceStr);
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("appid", WX_XCX_APPID); // APPid
         parameters.put("mch_id", WX_MCH_ID); // 商户id
+        parameters.put("openid",openId);
         parameters.put("nonce_str",nonceStr);
         parameters.put("body", body);
         parameters.put("out_trade_no", out_trade_no);//商户订单号
@@ -155,7 +162,7 @@ public class WechatPayController extends BaseController {
         parameters.put("spbill_create_ip", ip);//终端IP
         parameters.put("notify_url", wechat_pay_notify_url);//通知地址
         parameters.put("trade_type", trade_type);//交易类型
-        parameters.put("sign_type", WX_SIGN_TYPE);//交易类型
+        parameters.put("sign_type", WX_SIGN_TYPE);//签名类型
 
         try {
             wxPay = new WXPay(new IWxPayConfig(this.WX_XCX_APPID,this.WX_API_KEY,this.WX_MCH_ID,null));
@@ -167,7 +174,7 @@ public class WechatPayController extends BaseController {
         Map<String, String> response = null;
         try {
             response = wxPay.unifiedOrder(parameters);
-            log.warn("统一下单：response:\n",JSONObject.toJSONString(response));
+            log.warn("统一下单：response:{}\n",JSONObject.toJSONString(response));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -186,17 +193,36 @@ public class WechatPayController extends BaseController {
         }
 
         //String sign = response.get("sign");
+        String timeStamp = "" + new Date().getTime()/1000;
+        String nonce_str = WXPayUtil.generateNonceStr();
 
+        /*
+        String signUrlStr = "appId=%s&nonceStr=%s&package=%s&signType=%s&timeStamp=%s&key=%s";
+        String signUrl = String.format(signUrlStr,this.WX_XCX_APPID,nonce_str,"prepay_id="+prepay_id,this.WX_SIGN_TYPE,timeStamp+"",this.WX_API_KEY);
+        log.warn("signUrl:{}",signUrl);
+        String paySign = MD5Util.md5Encrypt32(signUrl).toUpperCase();
+        */
 
-        long timeStamp = new Date().getTime()/1000;
         //返回给小程序
-        JSONObject payRequest = new JSONObject();
+        Map payRequest = new HashMap();
         payRequest.put("appId",this.WX_XCX_APPID);
+//        payRequest.put("sub_appid",this.WX_XCX_APPID);
         payRequest.put("timeStamp",timeStamp);
-        payRequest.put("nonceStr",nonceStr);
+        payRequest.put("nonceStr",nonce_str);
         payRequest.put("package","prepay_id="+prepay_id);
         payRequest.put("signType",this.WX_SIGN_TYPE);
-
+        try {
+            String paySign = WXPayUtil.generateSignature(payRequest,this.WX_API_KEY);
+            payRequest.put("paySign",paySign);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("签名异常",e);
+            return JsonResult.fail("签名异常");
+        }
+        payRequest.put("mch_id",this.WX_MCH_ID);
+        payRequest.put("prepayid",prepay_id);
+        payRequest.put("api_key",this.WX_API_KEY);
+        log.warn("pay sign:{}",JSONObject.toJSONString(payRequest));
 
         return JsonResult.success(payRequest);
     }
@@ -424,7 +450,10 @@ public class WechatPayController extends BaseController {
             return JsonResult.fail("用户未绑定unionid");
         }
 
-        User user = userService.findByUnionId(unionIds.getOpenId());
+        User user = userService.findByUnionId(unionIds.getUnionId());
+        if(user == null){
+            return JsonResult.fail("用户异常");
+        }
         String userId = user.getUid();
         Account account = accountService.findByUserId(userId);
 
