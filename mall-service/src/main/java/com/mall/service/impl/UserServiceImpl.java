@@ -654,4 +654,10 @@ public class UserServiceImpl implements UserService {
         PageInfo<AccountBillOffline> accountBillOfflinePageInfo = new PageInfo<AccountBillOffline>(accountBillOfflineList);
         return accountBillOfflinePageInfo;
     }
+
+    @Override
+    public int bindUnionId(User user) {
+        int result = userDao.updateUser(user);
+        return result;
+    }
 }

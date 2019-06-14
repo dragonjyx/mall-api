@@ -47,7 +47,8 @@ public class WXPay {
             this.signType = WXPayConstants.SignType.MD5; // 沙箱环境
         }
         else {
-            this.signType = WXPayConstants.SignType.HMACSHA256;
+//            this.signType = WXPayConstants.SignType.HMACSHA256;
+            this.signType = WXPayConstants.SignType.MD5;
         }
         this.wxPayRequest = new WXPayRequest(config);
     }
@@ -111,16 +112,8 @@ public class WXPay {
      * @throws Exception
      */
     public Map<String, String> fillWidhdrawRequestData(Map<String, String> reqData) throws Exception {
-        reqData.put("mch_appid", config.getAppID());
-        reqData.put("mch_id", config.getMchID());
-//        reqData.put("nonce_str", WXPayUtil.generateNonceStr());
-        if (WXPayConstants.SignType.MD5.equals(this.signType)) {
-            reqData.put("sign_type", WXPayConstants.MD5);
-        }
-        else if (WXPayConstants.SignType.HMACSHA256.equals(this.signType)) {
-            reqData.put("sign_type", WXPayConstants.HMACSHA256);
-        }
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
+        log.warn("企业付款请求参数:{}",JSONObject.toJSONString(reqData));
         return reqData;
     }
 
@@ -148,7 +141,8 @@ public class WXPay {
         String signTypeInData = reqData.get(WXPayConstants.FIELD_SIGN_TYPE);
         WXPayConstants.SignType signType;
         if (signTypeInData == null) {
-            signType = WXPayConstants.SignType.HMACSHA256;
+//            signType = WXPayConstants.SignType.HMACSHA256;
+            signType = WXPayConstants.SignType.MD5;
         }
         else {
             signTypeInData = signTypeInData.trim();

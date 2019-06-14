@@ -72,7 +72,12 @@ public class UserLoginController extends BaseController {
             return JsonResult.fail("用户不存在");
         }
 
-
+        //绑定unionId
+        user.setUnionId(unionIds.getUnionId());
+        int res = userService.bindUnionId(user);
+        if(res != 1){
+            return JsonResult.fail("绑定unionId失败");
+        }
         try {
             Integer utype = userInfo.getUtype();
             String userId = user.getUid();

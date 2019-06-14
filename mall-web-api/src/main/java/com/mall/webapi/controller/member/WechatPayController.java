@@ -194,7 +194,8 @@ public class WechatPayController extends BaseController {
 
         //String sign = response.get("sign");
         String timeStamp = "" + new Date().getTime()/1000;
-        String nonce_str = WXPayUtil.generateNonceStr();
+//        String nonce_str = WXPayUtil.generateNonceStr();
+        String nonce_str = response.get("nonce_str");
 
         /*
         String signUrlStr = "appId=%s&nonceStr=%s&package=%s&signType=%s&timeStamp=%s&key=%s";
@@ -235,7 +236,8 @@ public class WechatPayController extends BaseController {
      * @param response
      * @return
      */
-    @RequestMapping(value = "notify", method = RequestMethod.POST)
+    @ResponseBody
+    @RequestMapping(value = "pay/notify", method = RequestMethod.POST)
     public String wechatNotify(HttpServletRequest request, HttpServletResponse response) {
         log.info("进入微信支付异步通知");
         String resXml="";
@@ -295,6 +297,8 @@ public class WechatPayController extends BaseController {
                 return xmlBack;
             }
 
+            //签名
+//            notifyMap.put("sign_type",this.WX_SIGN_TYPE);
 
             if (wxPay.isPayResultNotifySignatureValid(notifyMap)) {
                 // 签名正确,进行处理。
@@ -436,7 +440,8 @@ public class WechatPayController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping(value = "widthdraw", method = RequestMethod.POST)
+    @ResponseBody
+    @RequestMapping(value = "user/widthdraw", method = RequestMethod.POST)
     public JsonResult wechatWithdraw(HttpServletRequest request,@RequestBody JSONObject params) {
         BigDecimal widthdrawAmount = params.getBigDecimal("widthdrawAmount");
         if(widthdrawAmount == null){
@@ -449,14 +454,18 @@ public class WechatPayController extends BaseController {
         if(unionIds == null){
             return JsonResult.fail("用户未绑定unionid");
         }
+        log.warn("unionIds:{}",unionIds.toString());
+        String unionId = unionIds.getUnionId();
 
-        User user = userService.findByUnionId(unionIds.getUnionId());
+        User user = userService.findByUnionId(unionId);
+        log.warn("user:{}",user);
         if(user == null){
             return JsonResult.fail("用户异常");
         }
+
         String userId = user.getUid();
         Account account = accountService.findByUserId(userId);
-
+        log.warn("account:{}",account.toString());
         if(account == null){
             return JsonResult.fail("用户账户异常");
         }
@@ -472,7 +481,7 @@ public class WechatPayController extends BaseController {
 
 
         try {
-            wxPay = new WXPay(new IWxPayConfig(this.WX_XCX_APPID,this.WX_API_KEY,this.WX_MCH_ID,WX_CERT_PATH));
+            wxPay = new WXPay(new IWxPayConfig(this.WX_XCX_APPID,this.WX_API_KEY,this.WX_MCH_ID,this.WX_CERT_PATH));
         } catch (Exception e) {
             log.error("wxPay 异常：",e);
         }
@@ -505,11 +514,12 @@ public class WechatPayController extends BaseController {
         parameters.put("openid",openId);
         parameters.put("check_name","NO_CHECK");
         parameters.put("amount",widthdrawMoney+"");
-        parameters.put("desc",body+"");
+        parameters.put("desc",body);
         parameters.put("spbill_create_ip",ip);
 
         try {
             Map<String, String> response = wxPay.widthdraw(parameters);
+            log.warn("企业付款调用返回结果：{}",JSONObject.toJSONString(response));
 
             String returnCode = response.get("return_code");
             if (!SUCCESS.equals(returnCode)) {
@@ -536,7 +546,6 @@ public class WechatPayController extends BaseController {
 
             return JsonResult.success("提现成功");
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("企业付款失败:",e);
             return JsonResult.fail("提现失败");
         }

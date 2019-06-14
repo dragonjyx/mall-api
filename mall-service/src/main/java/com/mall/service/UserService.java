@@ -54,6 +54,8 @@ public interface UserService{
     PageInfo<AccountBill> userAccountBillListPage(PageCondition condition, Integer type, String userId, Date stateDate, Date endDate);
 
     PageInfo<AccountBillOffline> userAccountBillOfflineListPage(PageCondition condition, Integer type, String userId, Date stateDate, Date endDate);
+
+    int bindUnionId(User user);
 }
 
 
