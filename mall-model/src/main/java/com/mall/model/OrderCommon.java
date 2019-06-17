@@ -42,10 +42,10 @@ public class OrderCommon {
     private Date finishedTime;
 
     @Column(name="p_amount")
-    private BigDecimal amount;
+    private BigDecimal amount;//订单金额
 
     @Column(name="p_order_amount")
-    private BigDecimal orderAmount;
+    private BigDecimal orderAmount;//订单总额 = 订单金额 + 运费
 
     @Column(name="p_discount_amount")
     private BigDecimal discountAmount;
@@ -60,7 +60,7 @@ public class OrderCommon {
     private Integer integral;
 
     @Column(name="p_ship_fee")
-    private BigDecimal shipFee;
+    private BigDecimal shipFee;//运费
 
     @Column(name="p_country")
     private String country;

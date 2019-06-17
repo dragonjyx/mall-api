@@ -1,6 +1,7 @@
 package com.mall.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.java.utils.date.DateUtils;
@@ -63,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
         orderCommon.setProvince(province);
         orderCommon.setCity(city);
         orderCommon.setDistrict(district);
-        orderCommon.setShipFee(shipFee);
+        orderCommon.setShipFee(shipFee);//运费
         orderCommon.setIsDelete(0);
 
 
@@ -103,7 +104,8 @@ public class OrderServiceImpl implements OrderService {
             //减库存
             MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(cart.getGoodsSn(),cart.getGoodsCode());
             if(mallGoods != null){
-                orderGoods.setCostPrice(mallGoods.getCostPrice());
+//                log.warn("获取商品信息:{}",JSONObject.toJSONString(mallGoods));
+                orderGoods.setCostPrice(mallGoods.getCostPrice());//成本价
                 orderGoods.setSpecValue(mallGoods.getSpecValues());//规格值
 
                 Integer stockNum = mallGoods.getStockNum();
@@ -138,9 +140,8 @@ public class OrderServiceImpl implements OrderService {
             if(goodsPrice == null){
                 throw new ServiceException("购物车商品价格为空");
             }
-            for(int i = 0; i < buyNum ; i++){
-                totalPrice = totalPrice.add(goodsPrice);
-            }
+            BigDecimal allGoodsPrice = goodsPrice.multiply(new BigDecimal(buyNum));//商品价格 * 数量
+            totalPrice = totalPrice.add(allGoodsPrice);//统计总价格
         }
         log.warn("计算订单总价:{}",totalPrice);
         orderCommon.setAmount(totalPrice);
@@ -264,9 +265,8 @@ public class OrderServiceImpl implements OrderService {
         for (MallCart mallCart:mallCartList){
             Integer buyNum = mallCart.getBuyNum();
             BigDecimal goodsPrice = mallCart.getGoodsPrice();
-            for(int i = 0; i < buyNum ; i++){
-                totalPrice = totalPrice.add(goodsPrice);
-            }
+            BigDecimal allGoodsPrice = goodsPrice.multiply(new BigDecimal(buyNum));//商品价格 * 数量
+            totalPrice = totalPrice.add(allGoodsPrice);//统计总价格
         }
         orderCommon.setAmount(totalPrice);
         BigDecimal orderAmount = totalPrice.add(shipFee);
@@ -502,6 +502,7 @@ public class OrderServiceImpl implements OrderService {
                 log.error("xxxxxxxxxxxxxxxxx找不到配送员xxxxxxxxxxxxxxxxxxx");
             }
         }
+        log.warn("配送员分润金额:{}",shipFee);
 
         //2、供应商分润
         BigDecimal totalCostPrice = new BigDecimal(0);
@@ -547,8 +548,7 @@ public class OrderServiceImpl implements OrderService {
                 log.error("xxxxxxxxxxxxxxxxx找不到供应商xxxxxxxxxxxxxxxxxxx");
             }
         }
-
-
+        log.warn("供应商分润金额:{}",totalCostPrice);
 
         //3、楼长分润
         BigDecimal platformAmount = null;
@@ -564,11 +564,15 @@ public class OrderServiceImpl implements OrderService {
             }
 
             BigDecimal amount = orderCommonOffLine.getAmount();//订单总额
+            BigDecimal shareAmount = amount.subtract(totalCostPrice);//分润金额
 
             BigDecimal bigDecimal = userInfo.getDistributionRatio();
+            log.warn("代理商分润比例:{}",bigDecimal);
             if(bigDecimal != null){
-                BigDecimal userAmount = amount.multiply(bigDecimal);//代理商分润
-                platformAmount = amount.subtract(userAmount);//平台
+                BigDecimal userAmount = shareAmount.multiply(bigDecimal);//代理商分润
+                log.warn("代理商分润金额:{}",userAmount);
+                platformAmount = shareAmount.subtract(userAmount);//平台
+                log.warn("平台商分润金额:{}",platformAmount);
                 //楼长/区长 分润账户
                 Account account = accountDao.findByUserId(userId);
                 if(account != null){
@@ -717,6 +721,7 @@ public class OrderServiceImpl implements OrderService {
                 log.error("xxxxxxxxxxxxxxxxx找不到配送员xxxxxxxxxxxxxxxxxxx");
             }
         }
+        log.warn("配送员分润金额:{}",shipFee);
 
         //2、供应商分润
         BigDecimal totalCostPrice = new BigDecimal(0);
@@ -761,7 +766,7 @@ public class OrderServiceImpl implements OrderService {
                 log.error("xxxxxxxxxxxxxxxxx找不到供应商xxxxxxxxxxxxxxxxxxx");
             }
         }
-
+        log.warn("供应商分润金额:{}",totalCostPrice);
 
 
         //3、楼长分润
@@ -778,11 +783,16 @@ public class OrderServiceImpl implements OrderService {
             }
 
             BigDecimal amount = orderCommon.getAmount();//订单总额
+            BigDecimal shareAmount = amount.subtract(totalCostPrice);//分润金额
+
 
             BigDecimal bigDecimal = userInfo.getDistributionRatio();
+            log.warn("代理商分润比例:{}",bigDecimal);
             if(bigDecimal != null){
-                BigDecimal userAmount = amount.multiply(bigDecimal);//代理商分润
-                platformAmount = amount.subtract(userAmount);//平台
+                BigDecimal userAmount = shareAmount.multiply(bigDecimal);//代理商分润
+                log.warn("代理商分润金额:{}",userAmount);
+                platformAmount = shareAmount.subtract(userAmount);//平台
+                log.warn("平台商分润金额:{}",platformAmount);
                 //楼长/区长 分润账户
                 Account account = accountDao.findByUserId(userId);
                 if(account != null){
@@ -804,7 +814,7 @@ public class OrderServiceImpl implements OrderService {
                     log.error("xxxxxxxxxxxxxxxxx {} 楼长分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userInfo.getUid());
                 }
             }else{
-                platformAmount = amount;
+                platformAmount = shareAmount;
             }
         }else{
             log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员xxxxxxxxxxxxxxxxxxx");
@@ -922,6 +932,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         orderCommon.setShareMerchantFee(totalCostPrice);//供应商
+        log.warn("~供应商分润金额:{}",totalCostPrice);
 
         //3、楼长分润
         UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
@@ -931,10 +942,13 @@ public class OrderServiceImpl implements OrderService {
 
             if(userInfo != null){
                 BigDecimal amount = orderCommon.getAmount();//订单总额
-                BigDecimal bigDecimal = userInfo.getDistributionRatio();
-                if(bigDecimal != null){
-                    BigDecimal userAmount = amount.multiply(bigDecimal);//代理商分润
+                BigDecimal shareAmount = amount.subtract(totalCostPrice);
+                BigDecimal share = userInfo.getDistributionRatio();
+                log.warn("~代理商分润比例:{}",share);
+                if(share != null){
+                    BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
                     orderCommon.setShareUserAmount(userAmount);//楼长
+                    log.warn("~代理商分润金额:{}",userAmount);
                 }
             }
         }
@@ -974,7 +988,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         orderCommonOffLine.setShareMerchantFee(totalCostPrice);
-
+        log.warn("~~供应商分润金额:{}",totalCostPrice);
 
         //3、楼长分润
         UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
@@ -984,10 +998,12 @@ public class OrderServiceImpl implements OrderService {
 
             if(userInfo != null){
                 BigDecimal amount = orderCommonOffLine.getAmount();//订单总额
-                BigDecimal bigDecimal = userInfo.getDistributionRatio();
-                if(bigDecimal != null){
-                    BigDecimal userAmount = amount.multiply(bigDecimal);//代理商分润
+                BigDecimal shareAmount = amount.subtract(totalCostPrice);
+                BigDecimal share = userInfo.getDistributionRatio();
+                if(share != null){
+                    BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
                     orderCommonOffLine.setShareUserAmount(userAmount);
+                    log.warn("~~代理商分润金额:{}",userAmount);
                 }
             }
         }
