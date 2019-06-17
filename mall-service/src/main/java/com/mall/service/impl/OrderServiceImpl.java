@@ -309,6 +309,57 @@ public class OrderServiceImpl implements OrderService {
             String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
+
+
+            //============================分润========================
+            Long dormId = orderCommon.getDormId();
+            //1、配送员分润
+            BigDecimal shipFee = orderCommon.getShipFee();
+            if(shipFee != null){
+                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
+            }
+            orderCommon.setShareShipFee(shipFee);//运费
+
+            //2、供应商分润
+            BigDecimal totalCostPrice = new BigDecimal(0);
+            if(!orderGoodsList.isEmpty()){
+                for(OrderGoods orderGoods:orderGoodsList){
+                    String goodsCode = orderGoods.getGoodsCode();
+                    String goodsSn = orderGoods.getGoodsSn();
+                    Integer num = orderGoods.getNum();//购买数量
+                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
+                    if(mallGoods != null){
+                        BigDecimal costPrice = mallGoods.getCostPrice();
+                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
+                    }
+                }
+            }
+            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
+            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
+            log.info("~供应商分润金额:{}",totalCostPrice);
+
+            //3、楼长分润
+            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+            if(userSchoolDorm != null){
+                String userId = userSchoolDorm.getUserId();
+                UserInfo userInfo = userInfoDao.findByUserId(userId);
+
+                if(userInfo != null){
+                    BigDecimal amount = orderCommon.getAmount();//订单总额
+                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
+                    BigDecimal share = userInfo.getDistributionRatio();
+                    log.info("~代理商分润比例:{}",share);
+                    if(share != null){
+                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
+                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
+                        orderCommon.setShareUserAmount(userAmount);//楼长
+                        log.info("~代理商分润金额:{}",userAmount);
+                    }
+                }
+            }
+
+
+
         }
         PageInfo<OrderCommon> orderCommonPageInfo = new PageInfo<OrderCommon>(orderCommonList);
         return orderCommonPageInfo;
@@ -319,11 +370,61 @@ public class OrderServiceImpl implements OrderService {
     public PageInfo<OrderCommonOffLine> offlineOrderListPage(PageCondition condition, Long status, String memberId) {
         PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
         List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineDao.findByMemberIdAndStatus(memberId,status);
-        log.warn("orderCommonOffLineList:{}",orderCommonOffLineList.toString());
-        for (OrderCommonOffLine orderCommonOffLine:orderCommonOffLineList){
-            String orderSn = orderCommonOffLine.getOrderSn();
+        log.info("orderCommonOffLineList:{}",orderCommonOffLineList.toString());
+        for (OrderCommonOffLine orderCommon:orderCommonOffLineList){
+            String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
-            orderCommonOffLine.setOrderGoodsList(orderGoodsList);
+            orderCommon.setOrderGoodsList(orderGoodsList);
+
+
+            //============================分润========================
+            Long dormId = orderCommon.getDormId();
+            //1、配送员分润
+            BigDecimal shipFee = orderCommon.getShipFee();
+            if(shipFee != null){
+                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
+            }
+            orderCommon.setShareShipFee(shipFee);//运费
+
+            //2、供应商分润
+            BigDecimal totalCostPrice = new BigDecimal(0);
+            if(!orderGoodsList.isEmpty()){
+                for(OrderGoods orderGoods:orderGoodsList){
+                    String goodsCode = orderGoods.getGoodsCode();
+                    String goodsSn = orderGoods.getGoodsSn();
+                    Integer num = orderGoods.getNum();//购买数量
+                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
+                    if(mallGoods != null){
+                        BigDecimal costPrice = mallGoods.getCostPrice();
+                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
+                    }
+                }
+            }
+            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
+            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
+            log.info("~供应商分润金额:{}",totalCostPrice);
+
+            //3、楼长分润
+            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+            if(userSchoolDorm != null){
+                String userId = userSchoolDorm.getUserId();
+                UserInfo userInfo = userInfoDao.findByUserId(userId);
+
+                if(userInfo != null){
+                    BigDecimal amount = orderCommon.getAmount();//订单总额
+                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
+                    BigDecimal share = userInfo.getDistributionRatio();
+                    log.info("~代理商分润比例:{}",share);
+                    if(share != null){
+                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
+                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
+                        orderCommon.setShareUserAmount(userAmount);//楼长
+                        log.info("~代理商分润金额:{}",userAmount);
+                    }
+                }
+            }
+
+
         }
         PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
         return orderCommonOffLinePageInfo;
@@ -338,6 +439,54 @@ public class OrderServiceImpl implements OrderService {
             String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
+
+            //============================分润========================
+            Long dormId = orderCommon.getDormId();
+            //1、配送员分润
+            BigDecimal shipFee = orderCommon.getShipFee();
+            if(shipFee != null){
+                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
+            }
+            orderCommon.setShareShipFee(shipFee);//运费
+
+            //2、供应商分润
+            BigDecimal totalCostPrice = new BigDecimal(0);
+            if(!orderGoodsList.isEmpty()){
+                for(OrderGoods orderGoods:orderGoodsList){
+                    String goodsCode = orderGoods.getGoodsCode();
+                    String goodsSn = orderGoods.getGoodsSn();
+                    Integer num = orderGoods.getNum();//购买数量
+                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
+                    if(mallGoods != null){
+                        BigDecimal costPrice = mallGoods.getCostPrice();
+                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
+                    }
+                }
+            }
+            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
+            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
+            log.info("~供应商分润金额:{}",totalCostPrice);
+
+            //3、楼长分润
+            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+            if(userSchoolDorm != null){
+                String userId = userSchoolDorm.getUserId();
+                UserInfo userInfo = userInfoDao.findByUserId(userId);
+
+                if(userInfo != null){
+                    BigDecimal amount = orderCommon.getAmount();//订单总额
+                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
+                    BigDecimal share = userInfo.getDistributionRatio();
+                    log.info("~代理商分润比例:{}",share);
+                    if(share != null){
+                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
+                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
+                        orderCommon.setShareUserAmount(userAmount);//楼长
+                        log.info("~代理商分润金额:{}",userAmount);
+                    }
+                }
+            }
+
         }
         PageInfo<OrderCommon> orderCommonPageInfo = new PageInfo<OrderCommon>(orderCommonList);
         return orderCommonPageInfo;
@@ -347,10 +496,61 @@ public class OrderServiceImpl implements OrderService {
     public PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status, List<Object> dormIdList) {
         PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
         List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineDao.findByUserAndStatus( dormIdList,status);
-        for (OrderCommonOffLine orderCommonOffLine:orderCommonOffLineList){
-            String orderSn = orderCommonOffLine.getOrderSn();
+        for (OrderCommonOffLine orderCommon:orderCommonOffLineList){
+            String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
-            orderCommonOffLine.setOrderGoodsList(orderGoodsList);
+            orderCommon.setOrderGoodsList(orderGoodsList);
+
+
+
+            //============================分润========================
+            Long dormId = orderCommon.getDormId();
+            //1、配送员分润
+            BigDecimal shipFee = orderCommon.getShipFee();
+            if(shipFee != null){
+                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
+            }
+            orderCommon.setShareShipFee(shipFee);//运费
+
+            //2、供应商分润
+            BigDecimal totalCostPrice = new BigDecimal(0);
+            if(!orderGoodsList.isEmpty()){
+                for(OrderGoods orderGoods:orderGoodsList){
+                    String goodsCode = orderGoods.getGoodsCode();
+                    String goodsSn = orderGoods.getGoodsSn();
+                    Integer num = orderGoods.getNum();//购买数量
+                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
+                    if(mallGoods != null){
+                        BigDecimal costPrice = mallGoods.getCostPrice();
+                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
+                    }
+                }
+            }
+            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
+            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
+            log.info("~供应商分润金额:{}",totalCostPrice);
+
+            //3、楼长分润
+            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+            if(userSchoolDorm != null){
+                String userId = userSchoolDorm.getUserId();
+                UserInfo userInfo = userInfoDao.findByUserId(userId);
+
+                if(userInfo != null){
+                    BigDecimal amount = orderCommon.getAmount();//订单总额
+                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
+                    BigDecimal share = userInfo.getDistributionRatio();
+                    log.info("~代理商分润比例:{}",share);
+                    if(share != null){
+                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
+                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
+                        orderCommon.setShareUserAmount(userAmount);//楼长
+                        log.info("~代理商分润金额:{}",userAmount);
+                    }
+                }
+            }
+
+
         }
         PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
         return orderCommonOffLinePageInfo;
