@@ -326,7 +326,7 @@ public class WeChatServiceImpl implements WeChatService {
 
         JSONObject miniprogram = new JSONObject();
         miniprogram.put("appid",xcx_appid);
-        miniprogram.put("path",path);//小程序跳转路径
+        miniprogram.put("pagepath",path);//小程序跳转路径
         template.setMiniprogram(miniprogram);
 
         /**

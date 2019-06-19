@@ -97,6 +97,8 @@ public class MemberLoginController extends BaseController {
             String openId     = resultJson.getString("openid");
             String sessionKey = resultJson.getString("session_key");
             String unionId    = resultJson.getString("unionid");
+//            String unionId    = null;
+
 
             byte[] content = Base64Util.decode(encryptedData);
             byte[] aesKey  = Base64Util.decode(sessionKey);
@@ -108,13 +110,14 @@ public class MemberLoginController extends BaseController {
             String country   = "";
             String province  = "";
             String city      = "";
+
             try {
                 byte[] descryptBytes = AES_CBC_PKCS7.decrypt(content,aesKey,ivByte);
                 String contentJson = new String(descryptBytes);
                 log.warn("解密内容：{}",contentJson);
 
                 JSONObject userInfoJson = JSONObject.parseObject(contentJson);
-                //String unionId     = userInfoJson.getString("unionId");
+                unionId     = userInfoJson.getString("unionId");
 
                 if(StringUtils.isEmpty(unionId)){
                     return JsonResult.fail("unionId is null");
@@ -129,6 +132,10 @@ public class MemberLoginController extends BaseController {
 
             }catch (Exception e){
                 log.error("解密失败",e);
+            }
+
+            if(StringUtils.isEmpty(unionId)){
+                return JsonResult.fail("unionId is null");
             }
 
             //加入绑定
