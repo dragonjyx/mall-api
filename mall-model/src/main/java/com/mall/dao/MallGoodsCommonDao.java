@@ -36,7 +36,7 @@ public class MallGoodsCommonDao {
         if(schoolDormId != null){
             criteria.andEqualTo("schoolDormId",schoolDormId);
         }
-
+        criteria.andEqualTo("isDelete",0);
         List<MallGoodsCommon> mallGoodsCommons = mallGoodsCommonMapper.selectByExample(example);
         return mallGoodsCommons;
     }
@@ -46,6 +46,7 @@ public class MallGoodsCommonDao {
     public MallGoodsCommon findByName(String name) {
         MallGoodsCommon mallGoodsCommon = new MallGoodsCommon();
         mallGoodsCommon.setName(name);
+        mallGoodsCommon.setIsDelete(0);
         mallGoodsCommon = mallGoodsCommonMapper.selectOne(mallGoodsCommon);
         return mallGoodsCommon;
     }
@@ -58,6 +59,7 @@ public class MallGoodsCommonDao {
     public MallGoodsCommon findBySn(String sn) {
         MallGoodsCommon mallGoodsCommon = new MallGoodsCommon();
         mallGoodsCommon.setSn(sn);
+        mallGoodsCommon.setIsDelete(0);
         mallGoodsCommon = mallGoodsCommonMapper.selectOne(mallGoodsCommon);
         return mallGoodsCommon;
     }

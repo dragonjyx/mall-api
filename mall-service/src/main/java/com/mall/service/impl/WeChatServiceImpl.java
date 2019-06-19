@@ -321,8 +321,8 @@ public class WeChatServiceImpl implements WeChatService {
         List<TemplateParams> paramsList=new ArrayList<TemplateParams>();
 
 
-        String path = String.format(xcx_path,utype,online);
-        log.warn("小程序跳转路径:{}",path);
+        String path = String.format(xcx_path,utype+"",online+"");
+        log.warn("--------------------------------小程序跳转路径:{}",path);
 
         JSONObject miniprogram = new JSONObject();
         miniprogram.put("appid",xcx_appid);
@@ -345,7 +345,9 @@ public class WeChatServiceImpl implements WeChatService {
         paramsList.add(new TemplateParams("keyword3",params.getString("receiveName"),"#000000"));
         paramsList.add(new TemplateParams("keyword4",params.getString("phoneNum"),"#000000"));
         paramsList.add(new TemplateParams("keyword5",params.getString("address"),"#000000"));
-        paramsList.add(new TemplateParams("remark",params.getString("remark"),"#000000"));
+        String remark = params.getString("remark");
+        remark = remark==null?"":remark;
+        paramsList.add(new TemplateParams("remark",remark,"#000000"));
         template.setTemplateParamList(paramsList);
 
 
