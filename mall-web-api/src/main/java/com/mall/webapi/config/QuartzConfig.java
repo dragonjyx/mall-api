@@ -43,7 +43,7 @@ public class QuartzConfig {
     @Bean
     public Trigger shareJobTrigger(){
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(shareTaskCron);
-        Trigger trigger = TriggerBuilder.newTrigger().forJob(orderJobDetail()).withIdentity(shareTaskIdentity).withSchedule(cronScheduleBuilder).build();
+        Trigger trigger = TriggerBuilder.newTrigger().forJob(shareJobDetail()).withIdentity(shareTaskIdentity).withSchedule(cronScheduleBuilder).build();
         return trigger;
     }
 
