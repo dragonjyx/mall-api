@@ -1,6 +1,7 @@
 package com.mall.webapi.config;
 
 import com.mall.webapi.task.OrderTask;
+import com.mall.webapi.task.ShareTask;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,7 @@ public class QuartzConfig {
 
     @Bean
     public JobDetail shareJobDetail(){
-        return JobBuilder.newJob(OrderTask.class).withIdentity(shareTaskIdentity).storeDurably().build();
+        return JobBuilder.newJob(ShareTask.class).withIdentity(shareTaskIdentity).storeDurably().build();
     }
 
     @Bean
