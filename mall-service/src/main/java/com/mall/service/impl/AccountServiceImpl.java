@@ -3,6 +3,7 @@ package com.mall.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.java.redis.util.UniqueIdGenerate;
+import com.java.utils.date.DateUtils;
 import com.java.validate.ServiceException;
 import com.mall.dao.*;
 import com.mall.model.*;
@@ -201,5 +202,46 @@ public class AccountServiceImpl implements AccountService {
     public int generateAccountBill(AccountBill accountBill) {
         int result = accountBillDao.addAccountBill(accountBill);
         return result;
+    }
+
+    @Transactional
+    @Override
+    public void accountShare(int order_share_day) {
+        //1.已经支付，超过两天的账单
+        Date now = new Date();
+        Date offectDay = DateUtils.offectTime(order_share_day*-1);
+        List<AccountBill> accountBillList = this.findShareAccountBill(offectDay);
+
+        int result = 0;
+        for(AccountBill accountBill:accountBillList){
+            String accountId = accountBill.getAccountId();
+            Account account  = this.findAccount(accountId);
+            if(account == null){
+                log.error("accountId:{}账户查询异常",accountId);
+                continue;
+            }
+            BigDecimal amount = accountBill.getAmount();
+            BigDecimal money  = account.getMoney();
+            BigDecimal sum    = money.add(amount);
+
+            account.setMoney(sum);
+            account.setUpdateTime(now);
+
+            result = this.updateAccount(account);
+            if(result != 1){
+                log.error("分润入账失败");
+                continue;
+            }
+
+            accountBill.setStatus(AccountBillStatus.UNFREE.value);
+            accountBill.setBillStatus(BillStatus.SUCCESS.value);
+            accountBill.setUpdateTime(now);
+
+            result = this.updateAccountBill(accountBill);
+            if(result != 1){
+                log.error("分润入账成功，更新账单失败");
+                throw new ServiceException("分润入账成功，更新账单失败");
+            }
+        }
     }
 }

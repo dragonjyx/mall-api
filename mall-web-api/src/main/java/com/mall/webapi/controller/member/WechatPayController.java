@@ -550,4 +550,16 @@ public class WechatPayController extends BaseController {
             return JsonResult.fail("提现失败");
         }
     }
+
+
+    @ResponseBody
+    @RequestMapping(value = "account/share",method = RequestMethod.GET)
+    public JsonResult shareAccount(){
+        accountService.accountShare(2);
+        return JsonResult.success("账户分润");
+    }
+
+
+
+
 }

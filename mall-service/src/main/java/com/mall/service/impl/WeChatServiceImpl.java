@@ -429,7 +429,7 @@ public class WeChatServiceImpl implements WeChatService {
         message.put("subject",subject);
         message.put("receiveName", orderCommon.getReceiverName());
         message.put("phoneNum", orderCommon.getPhoneNum());
-        message.put("address", orderCommon.getProvince() + orderCommon.getCity() + orderCommon.getDistrict() + orderCommon.getAddress());
+        message.put("address", orderCommon.getProvince() + orderCommon.getCity() + orderCommon.getDistrict() + orderCommon.getSchoolName() + orderCommon.getDormName() + orderCommon.getAddress());
         message.put("remark", orderCommon.getRemark());
 
 
@@ -499,7 +499,7 @@ public class WeChatServiceImpl implements WeChatService {
         message.put("subject",subject);
         message.put("receiveName", orderCommonOffLine.getReceiverName());
         message.put("phoneNum", orderCommonOffLine.getPhoneNum());
-        message.put("address", orderCommonOffLine.getProvince() + orderCommonOffLine.getCity() + orderCommonOffLine.getDistrict() + orderCommonOffLine.getAddress());
+        message.put("address", orderCommonOffLine.getProvince() + orderCommonOffLine.getCity() + orderCommonOffLine.getDistrict() + orderCommonOffLine.getSchoolName() + orderCommonOffLine.getDormName() + orderCommonOffLine.getAddress());
         message.put("remark", orderCommonOffLine.getRemark());
 
         //发送消息

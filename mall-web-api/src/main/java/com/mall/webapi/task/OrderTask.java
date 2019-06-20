@@ -1,5 +1,6 @@
 package com.mall.webapi.task;
 
+import com.java.utils.date.DateUtils;
 import com.java.validate.ServiceException;
 import com.mall.dao.MallGoodsDao;
 import com.mall.model.MallGoods;
@@ -39,8 +40,7 @@ public class OrderTask extends QuartzJobBean {
     @Transactional
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-//        log.warn("------------OrderTask-------------");
-
+        log.warn("------------OrderTask time:{}-------------",DateUtils.Long2String(System.currentTimeMillis(),DateUtils.YYYY_MM_dd_HH_mm_ss));
         //1.已经生成的订单，未支付，超过两个小时
         Date now = new Date();
         long timeOut = now.getTime() - order_timeout_seconds;

@@ -45,4 +45,9 @@ public interface AccountService {
     int widthdrawMoney(Account account, String orderSn);
 
     int generateAccountBill(AccountBill accountBill);
+
+    void accountShare(int order_share_day);
+
+
+
 }
