@@ -5,6 +5,7 @@ import com.mall.model.MallGoodsCommon;
 import com.mall.params.page.Page;
 import com.mall.params.page.PageHandler;
 import com.mall.params.resp.MallGoodsCommonResp;
+import com.mall.params.status.GoodsStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -36,7 +37,7 @@ public class MallGoodsCommonDao {
         if(schoolDormId != null){
             criteria.andEqualTo("schoolDormId",schoolDormId);
         }
-        criteria.andEqualTo("isDelete",0);
+        criteria.andEqualTo("isDelete",0).andEqualTo("status",GoodsStatus.PUTAWAY.value);
         List<MallGoodsCommon> mallGoodsCommons = mallGoodsCommonMapper.selectByExample(example);
         return mallGoodsCommons;
     }
