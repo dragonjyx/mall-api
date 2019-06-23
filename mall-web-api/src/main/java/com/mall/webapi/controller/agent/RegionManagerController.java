@@ -142,7 +142,7 @@ public class RegionManagerController extends BaseController {
             return JsonResult.fail("订单异常");
         }
         UserSchoolDormManage userSchoolDormManage = schoolService.findByDormId(orderCommon.getDormId());
-        if(userSchoolDormManage != null &&
+        if(userSchoolDormManage != null && //有配送员
                 orderCommon.getStatus() != OrderStatus.PAYED_DELIVING.value &&
                 status == OrderStatus.PAYED_FINISH_DELIVER.value){//有配送员 并且还没配送
             return JsonResult.fail("等待配送员配送");

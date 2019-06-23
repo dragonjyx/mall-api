@@ -821,7 +821,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new ServiceException("xxxxxxxxxxxxxxxxx " + platformAccount.getUid() + "线下冻结平台用户账单失败 xxxxxxxxxxxxxxxxxxx");
             }
         }else{
-            log.error("xxxxxxxxxxxxxxxxx {} 平台用户未开通账户 xxxxxxxxxxxxxxxxxxx",platformAccount.getUid());
+            log.error("xxxxxxxxxxxxxxxxx {} 平台用户未开通账户 xxxxxxxxxxxxxxxxxxx",platformAccount);
         }
 
         return 1;
@@ -1039,7 +1039,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new ServiceException("xxxxxxxxxxxxxxxxx " + platformAccount.getUid() + "冻结平台用户账单失败 xxxxxxxxxxxxxxxxxxx");
             }
         }else{
-            log.error("xxxxxxxxxxxxxxxxx {} 平台用户未开通账户 xxxxxxxxxxxxxxxxxxx",platformAccount.getUid());
+            log.error("xxxxxxxxxxxxxxxxx {} 平台用户未开通账户 xxxxxxxxxxxxxxxxxxx",platformAccount);
         }
 
         return 1;
