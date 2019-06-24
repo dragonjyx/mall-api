@@ -101,7 +101,7 @@ public class BaseController implements EnvironmentAware {
         if(session == null){
             return null;
         }
-        log.info("getOpenId session:{}",session.toJSONString());
+        log.warn("getOpenId session:{}",session.toJSONString());
         return session.getString(XCX_OPEN_ID);
     }
 
@@ -116,7 +116,7 @@ public class BaseController implements EnvironmentAware {
         if(session == null){
             return null;
         }
-        log.info("getSession session:{}",session.toJSONString());
+        log.warn("getSession session:{}",session.toJSONString());
         return session;
     }
 

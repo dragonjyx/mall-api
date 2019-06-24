@@ -393,12 +393,9 @@ public class WeChatServiceImpl implements WeChatService {
 
         JSONArray phoneNums = new JSONArray();
 
-        Long dormId = orderCommon.getDormId();
-        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-        if(userSchoolDorm != null) {
-            String userId = userSchoolDorm.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
-
+        String regionUserId = orderCommon.getRegionUserId();
+        if(regionUserId != null) {
+            UserInfo userInfo = userInfoDao.findByUserId(regionUserId);
             if(userInfo == null){
                 log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
             }
@@ -408,10 +405,9 @@ public class WeChatServiceImpl implements WeChatService {
             log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员xxxxxxxxxxxxxxxxxxx");
         }
 
-        UserSchoolDormManage userSchoolDormManage = userSchoolDormManageDao.findByDormId(dormId);
-        if(userSchoolDormManage != null){
-            String userId = userSchoolDormManage.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
+        String deliverUserId = orderCommon.getDeliverUserId();
+        if(deliverUserId != null){
+            UserInfo userInfo = userInfoDao.findByUserId(deliverUserId);
             if(userInfo == null){
                 log.error("xxxxxxxxxxxxxxxxx找不到小配送员xxxxxxxxxxxxxxxxxxx");
             }
@@ -463,12 +459,9 @@ public class WeChatServiceImpl implements WeChatService {
 
         JSONArray phoneNums = new JSONArray();
 
-        Long dormId = orderCommonOffLine.getDormId();
-        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-        if(userSchoolDorm != null) {
-            String userId = userSchoolDorm.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
-
+        String regionUserId = orderCommonOffLine.getRegionUserId();
+        if(regionUserId != null) {
+            UserInfo userInfo = userInfoDao.findByUserId(regionUserId);
             if(userInfo == null){
                 log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
             }
@@ -478,10 +471,9 @@ public class WeChatServiceImpl implements WeChatService {
             log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员xxxxxxxxxxxxxxxxxxx");
         }
 
-        UserSchoolDormManage userSchoolDormManage = userSchoolDormManageDao.findByDormId(dormId);
-        if(userSchoolDormManage != null){
-            String userId = userSchoolDormManage.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
+        String deliverUserId = orderCommonOffLine.getDeliverUserId();
+        if(deliverUserId != null){
+            UserInfo userInfo = userInfoDao.findByUserId(deliverUserId);
             if(userInfo == null){
                 log.error("xxxxxxxxxxxxxxxxx找不到小配送员xxxxxxxxxxxxxxxxxxx");
             }
@@ -490,7 +482,6 @@ public class WeChatServiceImpl implements WeChatService {
         }else{
             log.error("xxxxxxxxxxxxxxxxx找不到小配送员xxxxxxxxxxxxxxxxxxx");
         }
-
 
         JSONObject message  = new JSONObject();
         message.put("title","下单通知");
