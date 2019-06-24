@@ -665,7 +665,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
         BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
 
-        if(!isDeliverExist){
+        if(!isDeliverExist && shipFee != null){
             platformAmount = platformAmount.add(shipFee);
         }
 
@@ -848,7 +848,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
         BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
 
-        if(!isDeliverExist){
+        if(!isDeliverExist && shipFee != null){
             platformAmount = platformAmount.add(shipFee);
         }
 
