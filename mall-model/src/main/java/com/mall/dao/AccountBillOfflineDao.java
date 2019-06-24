@@ -3,6 +3,7 @@ package com.mall.dao;
 import com.mall.mapper.AccountBillOfflineMapper;
 import com.mall.model.AccountBill;
 import com.mall.model.AccountBillOffline;
+import com.mall.params.status.AccountBillOfflineSettleStatus;
 import com.mall.params.status.AccountBillStatus;
 import com.mall.params.status.AccountBillType;
 import com.mall.params.status.BillStatus;
@@ -26,7 +27,7 @@ public class AccountBillOfflineDao {
 
 
     public BigDecimal sumFreeAmount(String accountId){
-        BigDecimal withdrawAmount = accountBillOfflineMapper.sumAmount(accountId,AccountBillType.ENTER.value,AccountBillStatus.FREE.value,BillStatus.SUCCESS.value);
+        BigDecimal withdrawAmount = accountBillOfflineMapper.sumAmount(accountId,AccountBillType.ENTER.value,AccountBillStatus.FREE.value,BillStatus.SUCCESS.value,AccountBillOfflineSettleStatus.NO_SETTLE.value);
         return withdrawAmount;
     }
 

@@ -562,11 +562,11 @@ public class OrderServiceImpl implements OrderService {
 
         //账单分润
         //============================生成分润账单========================
-        Long dormId = orderCommonOffLine.getDormId();
         Date now = new Date();
         String month = DateUtils.Long2String(now.getTime(),"yyyy-MM");
 
         //1、配送员分润
+        boolean isDeliverExist = true;
         BigDecimal shipFee   = orderCommonOffLine.getDeliverShare();
         String deliverUserId = orderCommonOffLine.getDeliverUserId();
         if(shipFee != null && deliverUserId != null){
@@ -590,6 +590,9 @@ public class OrderServiceImpl implements OrderService {
             }else{
                 log.error("xxxxxxxxxxxxxxxxx配送员未开通账号xxxxxxxxxxxxxxxxxxx");
             }
+        }else{
+            isDeliverExist = false;
+            log.error("xxxxxxxxxxxxxxxxx配送员不存在,运费分给平台xxxxxxxxxxxxxxxxxxx");
         }
         log.warn("配送员分润金额:{}",shipFee);
 
@@ -661,6 +664,11 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal amount         = orderCommonOffLine.getAmount();//订单总额
         BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
         BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
+
+        if(!isDeliverExist){
+            platformAmount = platformAmount.add(shipFee);
+        }
+
         log.warn("平台商分润金额:{}",platformAmount);
         Account platformAccount= accountDao.findByAccountId(platformAccountId);
         if(platformAccount != null){
@@ -747,6 +755,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //============================生成分润账单========================
+        boolean isDeliverExist = true;
         Date now = new Date();
         //1、配送员分润
         BigDecimal shipFee = orderCommon.getDeliverShare();
@@ -771,6 +780,9 @@ public class OrderServiceImpl implements OrderService {
             }else{
                 log.error("xxxxxxxxxxxxxxxxx配送员未开通账号xxxxxxxxxxxxxxxxxxx");
             }
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx配送员不存在xxxxxxxxxxxxxxxxxxx");
+            isDeliverExist = false;
         }
         log.warn("配送员分润金额:{}",shipFee);
 
@@ -835,6 +847,11 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal amount         = orderCommon.getAmount();//订单总额
         BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
         BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
+
+        if(!isDeliverExist){
+            platformAmount = platformAmount.add(shipFee);
+        }
+
         log.warn("平台商分润金额:{}",platformAmount);
         Account platformAccount= accountDao.findByAccountId(platformAccountId);
         if(platformAccount != null){

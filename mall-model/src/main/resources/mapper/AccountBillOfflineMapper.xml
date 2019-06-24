@@ -13,6 +13,7 @@
         <result column="p_update_time" property="updateTime"/>
         <result column="p_bill_status" property="billStatus"/>
         <result column="p_month" property="month"/>
+        <result column="p_is_settle" property="isSettle"/>
     </resultMap>
 
 
@@ -33,13 +34,14 @@
     </select>
 
 
-
+    <!--冻结金额-->
     <select id="sumAmount" resultType="java.math.BigDecimal">
       SELECT SUM(p_amount) FROM t_account_bill_offline
       WHERE p_type=#{type}
       AND p_account_id=#{accountId}
       AND p_status=#{status}
       AND p_bill_status=#{billStatus}
+      AND p_is_settle=#{isSettle}
     </select>
 
 

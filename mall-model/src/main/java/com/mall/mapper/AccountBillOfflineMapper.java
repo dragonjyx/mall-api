@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface AccountBillOfflineMapper extends Mapper<AccountBillOffline> {
 
-    BigDecimal sumAmount(@Param("accountId") String accountId, @Param("type")Integer type, @Param("status") Integer status, @Param("billStatus") Integer billStatus);
+    BigDecimal sumAmount(@Param("accountId") String accountId, @Param("type")Integer type, @Param("status") Integer status, @Param("billStatus") Integer billStatus,@Param("isSettle")Integer isSettle);
 
     List<AccountBillOffline> findBillList(@Param("accountId") String accountId, @Param("type")Integer type, @Param("stateDate")  Date stateDate, @Param("endDate")  Date endDate);
 }

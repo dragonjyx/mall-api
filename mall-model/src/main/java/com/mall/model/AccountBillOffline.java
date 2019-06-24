@@ -51,4 +51,9 @@ public class AccountBillOffline {
 
     @Column(name="p_bill_status")
     private Integer billStatus;//0:失败 1：正常
+
+    @Column(name="p_is_settle")
+    private Integer isSettle;//是否已经结算 0：未结算 1：已经结算
+
+
 }

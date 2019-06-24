@@ -595,6 +595,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AccountBillOfflineDao accountBillOfflineDao;
 
+    @Autowired
+    private SettlementDao settlementDao;
+
 
     @Override
     public JSONObject findAccountInfo(String uid) {
@@ -618,14 +621,22 @@ public class UserServiceImpl implements UserService {
         }
         result.put("freeAmount",freeAmount);//冻结金额
 
-        /*
+
+
+        //--------线下
         BigDecimal offlineFreeAmount = accountBillOfflineDao.sumFreeAmount(account.getAid());
         if(offlineFreeAmount == null){
             offlineFreeAmount = new BigDecimal(0);
         }
         result.put("offlineFreeAmount",offlineFreeAmount);//线下冻结金额
-        */
-        result.put("offlineFreeAmount",0);//线下冻结金额
+
+
+        BigDecimal offlineSettlementAmount = settlementDao.sumSettlement(uid,2);
+        if(offlineSettlementAmount == null){
+            offlineSettlementAmount = new BigDecimal(0);
+        }
+        result.put("offlineSettlementAmount",offlineSettlementAmount);//线下已结算金额
+
         return result;
     }
 

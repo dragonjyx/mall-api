@@ -32,7 +32,10 @@ public class Settlement {
     private BigDecimal amount;
 
     @Column(name="p_status")
-    private Integer status;
+    private Integer status;//状态 1.初始化，2.已结算
+
+    @Column(name="p_uid")
+    private String userId;//用户ID
 
     @Column(name="p_create_time")
     private Date createTime;
@@ -42,4 +45,7 @@ public class Settlement {
 
     @Column(name="p_remark")
     private String remark;
+
+    @Column(name="p_certificate")
+    private String certificate;
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.mapper.SettlementMapper">
+    <resultMap id="BaseResultMap" type="com.mall.model.Settlement">
+        <id column="p_id"  property="id" />
+        <result column="p_title"  property="title" />
+        <result column="p_sign"  property="sign" />
+        <result column="p_amount" property="amount" />
+        <result column="p_status"  property="status" />
+        <result column="p_uid"  property="userId" />
+        <result column="p_create_time"  property="createTime" />
+        <result column="p_status"  property="status" />
+        <result column="p_finished_time"  property="finishedTime" />
+        <result column="p_remark"  property="remark" />
+        <result column="p_certificate" property="certificate" />
+    </resultMap>
+
+
+    <select id="sumSettlementByUserIdAndStatus" resultType="java.math.BigDecimal">
+      SELECT SUM(p_amount) FROM t_settlement
+      WHERE p_uid=#{userId} AND p_status=#{status}
+    </select>
+
+
+</mapper>
