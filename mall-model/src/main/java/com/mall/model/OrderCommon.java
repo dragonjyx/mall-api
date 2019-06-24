@@ -143,18 +143,34 @@ public class OrderCommon {
     @Column(name="p_receiver_name")
     private String receiverName;
 
+
+
+    @Column(name="p_merchant_user_id")
+    private String merchantUserId;//供应商userId
+
+    @Column(name="p_merchant_share")
+    private BigDecimal merchantShare;//供应商分润
+
+    @Column(name="p_deliver_user_id")
+    private String deliverUserId;//配送员
+
+    @Column(name="p_deliver_share")
+    private BigDecimal deliverShare;//配送员分润
+
+    @Column(name="p_region_user_id")
+    private String regionUserId;//楼长userId
+
+    @Column(name="p_distribution_ratio")
+    private BigDecimal distributionRatio;//楼长分润比例
+
+    @Column(name="p_region_share")
+    private BigDecimal regionShare;//楼长分润
+
+
+
     @Transient
     private List<OrderGoods> orderGoodsList;//订单商品
 
-
-    @Transient
-    private BigDecimal shareShipFee;//运费
-
-    @Transient
-    private BigDecimal shareMerchantFee;//供应商
-
-    @Transient
-    private BigDecimal shareUserAmount;//楼长
 
 
 }

@@ -10,6 +10,7 @@ import com.mall.model.UserSchoolDorm;
 import com.mall.model.UserSchoolDormManage;
 import com.mall.params.page.PageCondition;
 import com.mall.params.status.OrderStatus;
+import com.mall.params.status.UserType;
 import com.mall.service.OrderService;
 import com.mall.service.SchoolService;
 import com.mall.webapi.controller.BaseController;
@@ -66,13 +67,7 @@ public class RegionManagerController extends BaseController {
         String token   = request.getParameter("token");
         String userId  = getUserId(token);
 
-        List<Object> dormIdList = new ArrayList<Object>();
-        List<UserSchoolDorm> userSchoolDormList = schoolService.findByUserSchoolDorm(userId);
-        for(UserSchoolDorm userSchoolDorm:userSchoolDormList ){
-            dormIdList.add(userSchoolDorm.getDormId());
-        }
-
-        PageInfo<OrderCommon> orderCommonPageInfo = orderService.userOrderListPage(condition,status,dormIdList);
+        PageInfo<OrderCommon> orderCommonPageInfo = orderService.userOrderListPage(condition,status,userId,UserType.AGENT.value);
         return JsonResult.success(orderCommonPageInfo);
     }
 
@@ -102,13 +97,7 @@ public class RegionManagerController extends BaseController {
         String token   = request.getParameter("token");
         String userId  = getUserId(token);
 
-        List<Object> dormIdList = new ArrayList<Object>();
-        List<UserSchoolDorm> userSchoolDormList = schoolService.findByUserSchoolDorm(userId);
-        for(UserSchoolDorm userSchoolDorm:userSchoolDormList ){
-            dormIdList.add(userSchoolDorm.getDormId());
-        }
-
-        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.userOfflineOrderListPage(condition,status,dormIdList);
+        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.userOfflineOrderListPage(condition,status,userId,UserType.AGENT.value);
         return JsonResult.success(orderCommonOffLinePageInfo);
     }
 
@@ -201,8 +190,8 @@ public class RegionManagerController extends BaseController {
         }
 
         String token  = request.getParameter("token");
-        String userId = getUserId(token);
 
+        String userId = getUserId(token);
         UserSchoolDorm userSchoolDorm = schoolService.findByUserIdAndDromId(userId,orderCommonOffLine.getDormId());
         if(userSchoolDorm == null){
             return JsonResult.fail("订单不属于该代理商");

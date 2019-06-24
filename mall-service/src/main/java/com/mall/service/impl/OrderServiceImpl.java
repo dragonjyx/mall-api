@@ -46,6 +46,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public String generateOrder(String memberId, String receiverName, String phoneNum, String schoolName, Long schoolId, String dormName, Long dormId, String address, JSONArray cartIdList, String province, String city, String district,BigDecimal shipFee) {
+        if(shipFee == null){
+            shipFee = new BigDecimal(0);
+        }
+
         //1.生成总订单
         Date now = new Date();
         String orderSn = SnUtil.createOrderSn();
@@ -69,6 +73,7 @@ public class OrderServiceImpl implements OrderService {
 
 
 //        List<MallGoods> mallGoodsList = new ArrayList<MallGoods>();
+        BigDecimal totalCostPrice = new BigDecimal(0);
 
         List<OrderGoods> orderGoodsList = new ArrayList<OrderGoods>();
         OrderGoods orderGoods = null;
@@ -99,17 +104,18 @@ public class OrderServiceImpl implements OrderService {
             orderGoods.setShipType(ShipType.SONG_HUO_SHANG_MEN.value);
             orderGoods.setShipNum(cart.getBuyNum());
 
-
-
             //减库存
             MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(cart.getGoodsSn(),cart.getGoodsCode());
             if(mallGoods != null){
 //                log.warn("获取商品信息:{}",JSONObject.toJSONString(mallGoods));
-                orderGoods.setCostPrice(mallGoods.getCostPrice());//成本价
+                BigDecimal costPrice = mallGoods.getCostPrice();
+                orderGoods.setCostPrice(costPrice);//成本价
                 orderGoods.setSpecValue(mallGoods.getSpecValues());//规格值
 
                 Integer stockNum = mallGoods.getStockNum();
                 Integer buyNum   = cart.getBuyNum();
+
+                totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(buyNum)));//成本价 累加
 
                 stockNum = stockNum - buyNum;
 
@@ -126,9 +132,7 @@ public class OrderServiceImpl implements OrderService {
                     throw new ServiceException(mallGoods.getName() + "库存减少，更新失败");
                 }
             }
-
             orderGoodsList.add(orderGoods);
-
         }
 
         log.warn("购物车商品:{}",mallCartList.toString());
@@ -150,6 +154,46 @@ public class OrderServiceImpl implements OrderService {
         orderCommon.setStatus(OrderStatus.NO_PAY.value);//待支付
         orderCommon.setRefundStatus(RefundStatus.NORMAL.value);
         orderCommon.setPayType(PayType.WECHAT.value);
+
+
+        //---------------计算分润 start --------------------
+        //1、配送员
+        UserSchoolDormManage userSchoolDormManage = userSchoolDormManageDao.findByDormId(dormId);
+        if(userSchoolDormManage != null){
+            orderCommon.setDeliverUserId(userSchoolDormManage.getUserId());
+            orderCommon.setDeliverShare(shipFee);
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx订单无配送员xxxxxxxxxxxxxxxxxxx");
+        }
+        //2、供应商
+        UserSchoolDormSupplier userSchoolDormSupplier = userSchoolDormSupplierDao.findBySchoolId(schoolId);
+        if(userSchoolDormSupplier != null){
+            orderCommon.setMerchantShare(totalCostPrice);
+            orderCommon.setMerchantUserId(userSchoolDormSupplier.getUserId());
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx订单无供应商xxxxxxxxxxxxxxxxxxx");
+        }
+        //3.楼长分润
+        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+        if(userSchoolDorm != null){
+            String userId = userSchoolDorm.getUserId();
+            UserInfo userInfo = userInfoDao.findByUserId(userId);
+            if(userInfo == null){
+                log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
+                throw new ServiceException("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
+            }
+
+            BigDecimal shareAmount = totalPrice.subtract(totalCostPrice);//可分润金额
+            BigDecimal userAmount  = shareAmount.multiply(userInfo.getDistributionRatio());//代理商分润
+            orderCommon.setRegionUserId(userId);
+            orderCommon.setDistributionRatio(userInfo.getDistributionRatio());
+            orderCommon.setRegionShare(userAmount);
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx订单无楼长xxxxxxxxxxxxxxxxxxx");
+        }
+
+        //---------------计算分润 end --------------------
+
 
         int result = orderCommonDao.insert(orderCommon);
         if(result != 1){
@@ -182,6 +226,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String generateOfflineOrder(String memberId, String receiverName, String phoneNum, String schoolName, Long schoolId, String dormName, Long dormId, String address, JSONArray cartIdList, String province, String city, String district,BigDecimal shipFee) {
+        if(shipFee == null){
+            shipFee = new BigDecimal(0);
+        }
+
         //1.生成总订单
         Date now = new Date();
         String orderSn = SnUtil.createOrderSn();
@@ -205,6 +253,7 @@ public class OrderServiceImpl implements OrderService {
 
 
 //        List<MallGoods> mallGoodsList = new ArrayList<MallGoods>();
+        BigDecimal totalCostPrice = new BigDecimal(0);
 
         List<OrderGoods> orderGoodsList = new ArrayList<OrderGoods>();
         OrderGoods orderGoods = null;
@@ -237,11 +286,16 @@ public class OrderServiceImpl implements OrderService {
             //减库存
             MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(cart.getGoodsSn(),cart.getGoodsCode());
             if(mallGoods != null){
-                orderGoods.setCostPrice(mallGoods.getCostPrice());
+
+                BigDecimal costPrice = mallGoods.getCostPrice();
+
+                orderGoods.setCostPrice(costPrice);
                 orderGoods.setSpecValue(mallGoods.getSpecValues());//规格值
 
                 Integer stockNum = mallGoods.getStockNum();
                 Integer buyNum = cart.getBuyNum();
+
+                totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(buyNum)));//成本价 累加
 
                 stockNum = stockNum - buyNum;
 
@@ -258,7 +312,6 @@ public class OrderServiceImpl implements OrderService {
             }
 
             orderGoodsList.add(orderGoods);
-
         }
 
         BigDecimal totalPrice = new BigDecimal(0);//计算订单总价
@@ -274,6 +327,47 @@ public class OrderServiceImpl implements OrderService {
         orderCommon.setStatus(OrderStatus.PAYED_NO_DELIVER.value);//已支付
         orderCommon.setRefundStatus(RefundStatus.NORMAL.value);
         orderCommon.setPayType(PayType.OFFLINE.value);
+
+
+        //---------------计算分润 start --------------------
+        //1、配送员
+        UserSchoolDormManage userSchoolDormManage = userSchoolDormManageDao.findByDormId(dormId);
+        if(userSchoolDormManage != null){
+            orderCommon.setDeliverUserId(userSchoolDormManage.getUserId());
+            orderCommon.setDeliverShare(shipFee);
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx订单无配送员xxxxxxxxxxxxxxxxxxx");
+        }
+        //2、供应商
+        UserSchoolDormSupplier userSchoolDormSupplier = userSchoolDormSupplierDao.findBySchoolId(schoolId);
+        if(userSchoolDormSupplier != null){
+            orderCommon.setMerchantShare(totalCostPrice);
+            orderCommon.setMerchantUserId(userSchoolDormSupplier.getUserId());
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx订单无供应商xxxxxxxxxxxxxxxxxxx");
+        }
+        //3.楼长分润
+        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
+        if(userSchoolDorm != null){
+            String userId = userSchoolDorm.getUserId();
+            UserInfo userInfo = userInfoDao.findByUserId(userId);
+            if(userInfo == null){
+                log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
+                throw new ServiceException("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
+            }
+
+            BigDecimal shareAmount = totalPrice.subtract(totalCostPrice);//可分润金额
+            BigDecimal userAmount  = shareAmount.multiply(userInfo.getDistributionRatio());//代理商分润
+            orderCommon.setRegionUserId(userId);
+            orderCommon.setDistributionRatio(userInfo.getDistributionRatio());
+            orderCommon.setRegionShare(userAmount);
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx订单无楼长xxxxxxxxxxxxxxxxxxx");
+        }
+
+        //---------------计算分润 end --------------------
+
+
 
         int result = orderCommonOffLineDao.insert(orderCommon);
         if(result != 1){
@@ -309,57 +403,6 @@ public class OrderServiceImpl implements OrderService {
             String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
-
-
-            //============================分润========================
-            Long dormId = orderCommon.getDormId();
-            //1、配送员分润
-            BigDecimal shipFee = orderCommon.getShipFee();
-            if(shipFee != null){
-                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
-            }
-            orderCommon.setShareShipFee(shipFee);//运费
-
-            //2、供应商分润
-            BigDecimal totalCostPrice = new BigDecimal(0);
-            if(!orderGoodsList.isEmpty()){
-                for(OrderGoods orderGoods:orderGoodsList){
-                    String goodsCode = orderGoods.getGoodsCode();
-                    String goodsSn = orderGoods.getGoodsSn();
-                    Integer num = orderGoods.getNum();//购买数量
-                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                    if(mallGoods != null){
-                        BigDecimal costPrice = mallGoods.getCostPrice();
-                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                    }
-                }
-            }
-            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
-            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
-            log.info("~供应商分润金额:{}",totalCostPrice);
-
-            //3、楼长分润
-            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-            if(userSchoolDorm != null){
-                String userId = userSchoolDorm.getUserId();
-                UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-                if(userInfo != null){
-                    BigDecimal amount = orderCommon.getAmount();//订单总额
-                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
-                    BigDecimal share = userInfo.getDistributionRatio();
-                    log.info("~代理商分润比例:{}",share);
-                    if(share != null){
-                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
-                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
-                        orderCommon.setShareUserAmount(userAmount);//楼长
-                        log.info("~代理商分润金额:{}",userAmount);
-                    }
-                }
-            }
-
-
-
         }
         PageInfo<OrderCommon> orderCommonPageInfo = new PageInfo<OrderCommon>(orderCommonList);
         return orderCommonPageInfo;
@@ -376,55 +419,6 @@ public class OrderServiceImpl implements OrderService {
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
 
-
-            //============================分润========================
-            Long dormId = orderCommon.getDormId();
-            //1、配送员分润
-            BigDecimal shipFee = orderCommon.getShipFee();
-            if(shipFee != null){
-                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
-            }
-            orderCommon.setShareShipFee(shipFee);//运费
-
-            //2、供应商分润
-            BigDecimal totalCostPrice = new BigDecimal(0);
-            if(!orderGoodsList.isEmpty()){
-                for(OrderGoods orderGoods:orderGoodsList){
-                    String goodsCode = orderGoods.getGoodsCode();
-                    String goodsSn = orderGoods.getGoodsSn();
-                    Integer num = orderGoods.getNum();//购买数量
-                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                    if(mallGoods != null){
-                        BigDecimal costPrice = mallGoods.getCostPrice();
-                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                    }
-                }
-            }
-            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
-            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
-            log.info("~供应商分润金额:{}",totalCostPrice);
-
-            //3、楼长分润
-            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-            if(userSchoolDorm != null){
-                String userId = userSchoolDorm.getUserId();
-                UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-                if(userInfo != null){
-                    BigDecimal amount = orderCommon.getAmount();//订单总额
-                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
-                    BigDecimal share = userInfo.getDistributionRatio();
-                    log.info("~代理商分润比例:{}",share);
-                    if(share != null){
-                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
-                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
-                        orderCommon.setShareUserAmount(userAmount);//楼长
-                        log.info("~代理商分润金额:{}",userAmount);
-                    }
-                }
-            }
-
-
         }
         PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
         return orderCommonOffLinePageInfo;
@@ -432,125 +426,26 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public PageInfo<OrderCommon> userOrderListPage(PageCondition condition, Long status, List<Object> dormIdList) {
+    public PageInfo<OrderCommon> userOrderListPage(PageCondition condition, Long status, String userId,int type) {
         PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
-        List<OrderCommon> orderCommonList = orderCommonDao.findByUserAndStatus( dormIdList,status);
+        List<OrderCommon> orderCommonList = orderCommonDao.findByUserAndStatus(userId,status,type);
         for (OrderCommon orderCommon:orderCommonList){
             String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
-
-            //============================分润========================
-            Long dormId = orderCommon.getDormId();
-            //1、配送员分润
-            BigDecimal shipFee = orderCommon.getShipFee();
-            if(shipFee != null){
-                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
-            }
-            orderCommon.setShareShipFee(shipFee);//运费
-
-            //2、供应商分润
-            BigDecimal totalCostPrice = new BigDecimal(0);
-            if(!orderGoodsList.isEmpty()){
-                for(OrderGoods orderGoods:orderGoodsList){
-                    String goodsCode = orderGoods.getGoodsCode();
-                    String goodsSn = orderGoods.getGoodsSn();
-                    Integer num = orderGoods.getNum();//购买数量
-                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                    if(mallGoods != null){
-                        BigDecimal costPrice = mallGoods.getCostPrice();
-                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                    }
-                }
-            }
-            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
-            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
-            log.info("~供应商分润金额:{}",totalCostPrice);
-
-            //3、楼长分润
-            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-            if(userSchoolDorm != null){
-                String userId = userSchoolDorm.getUserId();
-                UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-                if(userInfo != null){
-                    BigDecimal amount = orderCommon.getAmount();//订单总额
-                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
-                    BigDecimal share = userInfo.getDistributionRatio();
-                    log.info("~代理商分润比例:{}",share);
-                    if(share != null){
-                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
-                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
-                        orderCommon.setShareUserAmount(userAmount);//楼长
-                        log.info("~代理商分润金额:{}",userAmount);
-                    }
-                }
-            }
-
         }
         PageInfo<OrderCommon> orderCommonPageInfo = new PageInfo<OrderCommon>(orderCommonList);
         return orderCommonPageInfo;
     }
 
     @Override
-    public PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status, List<Object> dormIdList) {
+    public PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status,String userId,int type) {
         PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
-        List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineDao.findByUserAndStatus( dormIdList,status);
+        List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineDao.findByUserAndStatus(userId,status,type);
         for (OrderCommonOffLine orderCommon:orderCommonOffLineList){
             String orderSn = orderCommon.getOrderSn();
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
-
-
-
-            //============================分润========================
-            Long dormId = orderCommon.getDormId();
-            //1、配送员分润
-            BigDecimal shipFee = orderCommon.getShipFee();
-            if(shipFee != null){
-                shipFee = shipFee.setScale(2, BigDecimal.ROUND_HALF_UP);
-            }
-            orderCommon.setShareShipFee(shipFee);//运费
-
-            //2、供应商分润
-            BigDecimal totalCostPrice = new BigDecimal(0);
-            if(!orderGoodsList.isEmpty()){
-                for(OrderGoods orderGoods:orderGoodsList){
-                    String goodsCode = orderGoods.getGoodsCode();
-                    String goodsSn = orderGoods.getGoodsSn();
-                    Integer num = orderGoods.getNum();//购买数量
-                    MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                    if(mallGoods != null){
-                        BigDecimal costPrice = mallGoods.getCostPrice();
-                        totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                    }
-                }
-            }
-            totalCostPrice = totalCostPrice.setScale(2, BigDecimal.ROUND_HALF_UP);
-            orderCommon.setShareMerchantFee(totalCostPrice);//供应商
-            log.info("~供应商分润金额:{}",totalCostPrice);
-
-            //3、楼长分润
-            UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-            if(userSchoolDorm != null){
-                String userId = userSchoolDorm.getUserId();
-                UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-                if(userInfo != null){
-                    BigDecimal amount = orderCommon.getAmount();//订单总额
-                    BigDecimal shareAmount = amount.subtract(totalCostPrice);
-                    BigDecimal share = userInfo.getDistributionRatio();
-                    log.info("~代理商分润比例:{}",share);
-                    if(share != null){
-                        BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
-                        userAmount = userAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
-                        orderCommon.setShareUserAmount(userAmount);//楼长
-                        log.info("~代理商分润金额:{}",userAmount);
-                    }
-                }
-            }
-
-
         }
         PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
         return orderCommonOffLinePageInfo;
@@ -668,141 +563,105 @@ public class OrderServiceImpl implements OrderService {
         //账单分润
         //============================生成分润账单========================
         Long dormId = orderCommonOffLine.getDormId();
-        Long schoolId = orderCommonOffLine.getSchoolId();
         Date now = new Date();
         String month = DateUtils.Long2String(now.getTime(),"yyyy-MM");
 
         //1、配送员分润
-        BigDecimal shipFee = orderCommonOffLine.getShipFee();
-        if(shipFee != null){
-            UserSchoolDormManage userSchoolDormManage = userSchoolDormManageDao.findByDormId(dormId);
-            if(userSchoolDormManage != null){
-                String userId0 = userSchoolDormManage.getUserId();
-                Account account = accountDao.findByUserId(userId0);
-                if(account != null){
-                    AccountBillOffline accountBill = new AccountBillOffline();
-                    accountBill.setAccountId(account.getAid());
-                    accountBill.setType(AccountBillType.ENTER.value);
-                    accountBill.setOrderSn(orderCommonOffLine.getOrderSn());
-                    accountBill.setStatus(AccountBillStatus.UNFREE.value);
-                    accountBill.setAmount(shipFee);//分润费用
-                    accountBill.setIsDelete(Boolean.FALSE);
-                    accountBill.setCreateTime(now);
-                    accountBill.setUpdateTime(now);
-                    accountBill.setMonth(month);
-                    accountBill.setBillStatus(BillStatus.SUCCESS.value);
-                    result = accountBillOfflineDao.addAccountBill(accountBill);
-                    if(result != 1){
-                        throw new ServiceException("xxxxxxxxxxxxxxxxx " + userId0+ "线下配送员分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
-                    }
-                }else{
-                    log.error("xxxxxxxxxxxxxxxxx {} 线下配送员分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userId0);
+        BigDecimal shipFee   = orderCommonOffLine.getDeliverShare();
+        String deliverUserId = orderCommonOffLine.getDeliverUserId();
+        if(shipFee != null && deliverUserId != null){
+            Account account = accountDao.findByUserId(deliverUserId);
+            if(account != null){
+                AccountBillOffline accountBill = new AccountBillOffline();
+                accountBill.setAccountId(account.getAid());
+                accountBill.setType(AccountBillType.ENTER.value);
+                accountBill.setOrderSn(orderCommonOffLine.getOrderSn());
+                accountBill.setStatus(AccountBillStatus.UNFREE.value);
+                accountBill.setAmount(shipFee);//分润费用
+                accountBill.setIsDelete(Boolean.FALSE);
+                accountBill.setCreateTime(now);
+                accountBill.setUpdateTime(now);
+                accountBill.setMonth(month);
+                accountBill.setBillStatus(BillStatus.SUCCESS.value);
+                result = accountBillOfflineDao.addAccountBill(accountBill);
+                if(result != 1){
+                    throw new ServiceException("xxxxxxxxxxxxxxxxx " + deliverUserId + "线下配送员分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
                 }
             }else{
-                log.error("xxxxxxxxxxxxxxxxx找不到配送员xxxxxxxxxxxxxxxxxxx");
+                log.error("xxxxxxxxxxxxxxxxx配送员未开通账号xxxxxxxxxxxxxxxxxxx");
             }
         }
         log.warn("配送员分润金额:{}",shipFee);
 
-        //2、供应商分润
-        BigDecimal totalCostPrice = new BigDecimal(0);
-        List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderCommonOffLine.getOrderSn());
-        if(!orderGoodsList.isEmpty()){
-            for(OrderGoods orderGoods:orderGoodsList){
-                String goodsCode = orderGoods.getGoodsCode();
-                String goodsSn = orderGoods.getGoodsSn();
 
-                Integer num = orderGoods.getNum();//购买数量
-                MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                if(mallGoods != null){
-                    BigDecimal costPrice = mallGoods.getCostPrice();
-                    totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                }
-            }
-        }
-        if(totalCostPrice.compareTo(new BigDecimal(0)) == 1){
-            UserSchoolDormSupplier userSchoolDormSupplier = userSchoolDormSupplierDao.findBySchoolId(schoolId);
-            if(userSchoolDormSupplier != null){
-                String userId0 = userSchoolDormSupplier.getUserId();
-                Account account = accountDao.findByUserId(userId0);
-                if(account != null){
-                    AccountBillOffline accountBill = new AccountBillOffline();
-                    accountBill.setAccountId(account.getAid());
-                    accountBill.setType(AccountBillType.ENTER.value);
-                    accountBill.setOrderSn(orderCommonOffLine.getOrderSn());
-                    accountBill.setStatus(AccountBillStatus.UNFREE.value);
-                    accountBill.setAmount(totalCostPrice);//分润费用
-                    accountBill.setIsDelete(Boolean.FALSE);
-                    accountBill.setCreateTime(now);
-                    accountBill.setUpdateTime(now);
-                    accountBill.setMonth(month);
-                    accountBill.setBillStatus(BillStatus.SUCCESS.value);
-                    result = accountBillOfflineDao.addAccountBill(accountBill);
-                    if(result != 1){
-                        throw new ServiceException("xxxxxxxxxxxxxxxxx " + userId0+ "线下供应商分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
-                    }
-                }else{
-                    log.error("xxxxxxxxxxxxxxxxx {} 线下供应商分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userId0);
+        //2、供应商分润
+        BigDecimal totalCostPrice = orderCommonOffLine.getMerchantShare();
+        String merchantUserId     = orderCommonOffLine.getMerchantUserId();
+        if(merchantUserId != null && totalCostPrice != null){
+            Account account = accountDao.findByUserId(merchantUserId);
+            if(account != null){
+                AccountBillOffline accountBill = new AccountBillOffline();
+                accountBill.setAccountId(account.getAid());
+                accountBill.setType(AccountBillType.ENTER.value);
+                accountBill.setOrderSn(orderCommonOffLine.getOrderSn());
+                accountBill.setStatus(AccountBillStatus.UNFREE.value);
+                accountBill.setAmount(totalCostPrice);//分润费用
+                accountBill.setIsDelete(Boolean.FALSE);
+                accountBill.setCreateTime(now);
+                accountBill.setUpdateTime(now);
+                accountBill.setMonth(month);
+                accountBill.setBillStatus(BillStatus.SUCCESS.value);
+                result = accountBillOfflineDao.addAccountBill(accountBill);
+                if(result != 1){
+                    throw new ServiceException("xxxxxxxxxxxxxxxxx " + merchantUserId + "线下供应商分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
                 }
             }else{
-                log.error("xxxxxxxxxxxxxxxxx找不到供应商xxxxxxxxxxxxxxxxxxx");
+                log.error("xxxxxxxxxxxxxxxxx {} 线下供应商分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",merchantUserId);
             }
+        }else{
+            log.error("xxxxxxxxxxxxxxxxx找不到供应商xxxxxxxxxxxxxxxxxxx");
         }
         log.warn("供应商分润金额:{}",totalCostPrice);
 
+
         //3、楼长分润
-        BigDecimal platformAmount = null;
-        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-        if(userSchoolDorm != null){
+        String regionUserId   = orderCommonOffLine.getRegionUserId();
+        BigDecimal userAmount = orderCommonOffLine.getRegionShare();//代理商分润
+        log.warn("代理商分润比例:{}",orderCommonOffLine.getDistributionRatio());
 
-            String userId = userSchoolDorm.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-            if(userInfo == null){
-                log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
-                throw new ServiceException("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
-            }
-
-            BigDecimal amount = orderCommonOffLine.getAmount();//订单总额
-            BigDecimal shareAmount = amount.subtract(totalCostPrice);//分润金额
-
-            BigDecimal bigDecimal = userInfo.getDistributionRatio();
-            log.warn("代理商分润比例:{}",bigDecimal);
-            if(bigDecimal != null){
-                BigDecimal userAmount = shareAmount.multiply(bigDecimal);//代理商分润
-                log.warn("代理商分润金额:{}",userAmount);
-                platformAmount = shareAmount.subtract(userAmount);//平台
-                log.warn("平台商分润金额:{}",platformAmount);
-                //楼长/区长 分润账户
-                Account account = accountDao.findByUserId(userId);
-                if(account != null){
-                    AccountBillOffline accountBill = new AccountBillOffline();
-                    accountBill.setAccountId(account.getAid());
-                    accountBill.setType(AccountBillType.ENTER.value);
-                    accountBill.setOrderSn(orderCommonOffLine.getOrderSn());
-                    accountBill.setStatus(AccountBillStatus.UNFREE.value);
-                    accountBill.setAmount(userAmount);
-                    accountBill.setIsDelete(Boolean.FALSE);
-                    accountBill.setCreateTime(now);
-                    accountBill.setUpdateTime(now);
-                    accountBill.setMonth(month);
-                    accountBill.setBillStatus(BillStatus.SUCCESS.value);
-                    result = accountBillOfflineDao.addAccountBill(accountBill);
-                    if(result != 1){
-                        throw new ServiceException("xxxxxxxxxxxxxxxxx " + userInfo.getUid()+ "线下楼长分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
-                    }
-                }else{
-                    log.error("xxxxxxxxxxxxxxxxx {} 楼长分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userInfo.getUid());
+        if(regionUserId != null && userAmount != null){
+            //楼长/区长 分润账户
+            Account account = accountDao.findByUserId(regionUserId);
+            if(account != null){
+                AccountBillOffline accountBill = new AccountBillOffline();
+                accountBill.setAccountId(account.getAid());
+                accountBill.setType(AccountBillType.ENTER.value);
+                accountBill.setOrderSn(orderCommonOffLine.getOrderSn());
+                accountBill.setStatus(AccountBillStatus.UNFREE.value);
+                accountBill.setAmount(userAmount);
+                accountBill.setIsDelete(Boolean.FALSE);
+                accountBill.setCreateTime(now);
+                accountBill.setUpdateTime(now);
+                accountBill.setMonth(month);
+                accountBill.setBillStatus(BillStatus.SUCCESS.value);
+                result = accountBillOfflineDao.addAccountBill(accountBill);
+                if(result != 1){
+                    throw new ServiceException("xxxxxxxxxxxxxxxxx " + regionUserId + "线下楼长分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
                 }
             }else{
-                platformAmount = amount;
+                log.error("xxxxxxxxxxxxxxxxx {} 楼长分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",regionUserId);
             }
-        }else{
-            log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员xxxxxxxxxxxxxxxxxxx");
+        }else {
+            log.error("xxxxxxxxxxxxxxxxx找不到楼长xxxxxxxxxxxxxxxxxxx");
         }
+        log.warn("代理商分润金额:{}",userAmount);
 
 
         //4、平台分润
+        BigDecimal amount         = orderCommonOffLine.getAmount();//订单总额
+        BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
+        BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
+        log.warn("平台商分润金额:{}",platformAmount);
         Account platformAccount= accountDao.findByAccountId(platformAccountId);
         if(platformAccount != null){
             AccountBillOffline platformAccountBill = new AccountBillOffline();
@@ -888,140 +747,95 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //============================生成分润账单========================
-        Long dormId = orderCommon.getDormId();
-        Long schoolId = orderCommon.getSchoolId();
         Date now = new Date();
-
         //1、配送员分润
-        BigDecimal shipFee = orderCommon.getShipFee();
-        if(shipFee != null){
-            UserSchoolDormManage userSchoolDormManage = userSchoolDormManageDao.findByDormId(dormId);
-            if(userSchoolDormManage != null){
-                String userId0 = userSchoolDormManage.getUserId();
-                Account account = accountDao.findByUserId(userId0);
-                if(account != null){
-                    AccountBill accountBill = new AccountBill();
-                    accountBill.setAccountId(account.getAid());
-                    accountBill.setType(AccountBillType.ENTER.value);
-                    accountBill.setOrderSn(orderCommon.getOrderSn());
-                    accountBill.setStatus(AccountBillStatus.FREE.value);
-                    accountBill.setAmount(shipFee);//分润费用
-                    accountBill.setIsDelete(Boolean.FALSE);
-                    accountBill.setCreateTime(now);
-                    accountBill.setUpdateTime(now);
-                    accountBill.setBillStatus(BillStatus.SUCCESS.value);
-                    result = accountBillDao.addAccountBill(accountBill);
-                    if(result != 1){
-                        throw new ServiceException("xxxxxxxxxxxxxxxxx " + userId0+ "配送员分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
-                    }
-                }else{
-                    log.error("xxxxxxxxxxxxxxxxx {} 配送员分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userId0);
+        BigDecimal shipFee = orderCommon.getDeliverShare();
+        String deliverUserId = orderCommon.getDeliverUserId();
+        if(shipFee != null && deliverUserId != null){
+            Account account = accountDao.findByUserId(deliverUserId);
+            if(account != null){
+                AccountBill accountBill = new AccountBill();
+                accountBill.setAccountId(account.getAid());
+                accountBill.setType(AccountBillType.ENTER.value);
+                accountBill.setOrderSn(orderCommon.getOrderSn());
+                accountBill.setStatus(AccountBillStatus.FREE.value);
+                accountBill.setAmount(shipFee);//分润费用
+                accountBill.setIsDelete(Boolean.FALSE);
+                accountBill.setCreateTime(now);
+                accountBill.setUpdateTime(now);
+                accountBill.setBillStatus(BillStatus.SUCCESS.value);
+                result = accountBillDao.addAccountBill(accountBill);
+                if(result != 1){
+                    throw new ServiceException("xxxxxxxxxxxxxxxxx " + deliverUserId + "配送员分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
                 }
             }else{
-                log.error("xxxxxxxxxxxxxxxxx找不到配送员xxxxxxxxxxxxxxxxxxx");
+                log.error("xxxxxxxxxxxxxxxxx配送员未开通账号xxxxxxxxxxxxxxxxxxx");
             }
         }
         log.warn("配送员分润金额:{}",shipFee);
 
         //2、供应商分润
-        BigDecimal totalCostPrice = new BigDecimal(0);
-        List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderCommon.getOrderSn());
-        if(!orderGoodsList.isEmpty()){
-            for(OrderGoods orderGoods:orderGoodsList){
-                String goodsCode = orderGoods.getGoodsCode();
-                String goodsSn = orderGoods.getGoodsSn();
-
-                Integer num = orderGoods.getNum();//购买数量
-                MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                if(mallGoods != null){
-                    BigDecimal costPrice = mallGoods.getCostPrice();
-                    totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                }
-            }
-        }
-        if(totalCostPrice.compareTo(new BigDecimal(0)) == 1){
-            UserSchoolDormSupplier userSchoolDormSupplier = userSchoolDormSupplierDao.findBySchoolId(schoolId);
-            if(userSchoolDormSupplier != null){
-                String userId0 = userSchoolDormSupplier.getUserId();
-                Account account = accountDao.findByUserId(userId0);
-                if(account != null){
-                    AccountBill accountBill = new AccountBill();
-                    accountBill.setAccountId(account.getAid());
-                    accountBill.setType(AccountBillType.ENTER.value);
-                    accountBill.setOrderSn(orderCommon.getOrderSn());
-                    accountBill.setStatus(AccountBillStatus.FREE.value);
-                    accountBill.setAmount(totalCostPrice);//分润费用
-                    accountBill.setIsDelete(Boolean.FALSE);
-                    accountBill.setCreateTime(now);
-                    accountBill.setUpdateTime(now);
-                    accountBill.setBillStatus(BillStatus.SUCCESS.value);
-                    result = accountBillDao.addAccountBill(accountBill);
-                    if(result != 1){
-                        throw new ServiceException("xxxxxxxxxxxxxxxxx " + userId0+ "供应商分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
-                    }
-                }else{
-                    log.error("xxxxxxxxxxxxxxxxx {} 供应商分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userId0);
+        BigDecimal totalCostPrice = orderCommon.getMerchantShare();
+        String merchantUserId     = orderCommon.getMerchantUserId();
+        if(merchantUserId != null && totalCostPrice != null){
+            Account account = accountDao.findByUserId(merchantUserId);
+            if(account != null){
+                AccountBill accountBill = new AccountBill();
+                accountBill.setAccountId(account.getAid());
+                accountBill.setType(AccountBillType.ENTER.value);
+                accountBill.setOrderSn(orderCommon.getOrderSn());
+                accountBill.setStatus(AccountBillStatus.FREE.value);
+                accountBill.setAmount(totalCostPrice);//分润费用
+                accountBill.setIsDelete(Boolean.FALSE);
+                accountBill.setCreateTime(now);
+                accountBill.setUpdateTime(now);
+                accountBill.setBillStatus(BillStatus.SUCCESS.value);
+                result = accountBillDao.addAccountBill(accountBill);
+                if(result != 1){
+                    throw new ServiceException("xxxxxxxxxxxxxxxxx " + merchantUserId + "供应商分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
                 }
             }else{
-                log.error("xxxxxxxxxxxxxxxxx找不到供应商xxxxxxxxxxxxxxxxxxx");
+                log.error("xxxxxxxxxxxxxxxxx {} 供应商分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",merchantUserId);
             }
         }
         log.warn("供应商分润金额:{}",totalCostPrice);
 
 
         //3、楼长分润
-        BigDecimal platformAmount = null;
-        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-        if(userSchoolDorm != null){
+        String regionUserId   = orderCommon.getRegionUserId();
+        BigDecimal userAmount = orderCommon.getRegionShare();//代理商分润
+        log.warn("代理商分润比例:{}",orderCommon.getDistributionRatio());
 
-            String userId = userSchoolDorm.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-            if(userInfo == null){
-                log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
-                throw new ServiceException("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员 userxxxxxxxxxxxxxxxxxxx");
-            }
-
-            BigDecimal amount = orderCommon.getAmount();//订单总额
-            BigDecimal shareAmount = amount.subtract(totalCostPrice);//分润金额
-
-
-            BigDecimal bigDecimal = userInfo.getDistributionRatio();
-            log.warn("代理商分润比例:{}",bigDecimal);
-            if(bigDecimal != null){
-                BigDecimal userAmount = shareAmount.multiply(bigDecimal);//代理商分润
-                log.warn("代理商分润金额:{}",userAmount);
-                platformAmount = shareAmount.subtract(userAmount);//平台
-                log.warn("平台商分润金额:{}",platformAmount);
-                //楼长/区长 分润账户
-                Account account = accountDao.findByUserId(userId);
-                if(account != null){
-                    AccountBill accountBill = new AccountBill();
-                    accountBill.setAccountId(account.getAid());
-                    accountBill.setType(AccountBillType.ENTER.value);
-                    accountBill.setOrderSn(orderCommon.getOrderSn());
-                    accountBill.setStatus(AccountBillStatus.FREE.value);
-                    accountBill.setAmount(userAmount);
-                    accountBill.setIsDelete(Boolean.FALSE);
-                    accountBill.setCreateTime(now);
-                    accountBill.setUpdateTime(now);
-                    accountBill.setBillStatus(BillStatus.SUCCESS.value);
-                    result = accountBillDao.addAccountBill(accountBill);
-                    if(result != 1){
-                        throw new ServiceException("xxxxxxxxxxxxxxxxx " + userInfo.getUid()+ "楼长分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
-                    }
-                }else{
-                    log.error("xxxxxxxxxxxxxxxxx {} 楼长分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",userInfo.getUid());
+        if(regionUserId != null && userAmount != null){
+            //楼长/区长 分润账户
+            Account account = accountDao.findByUserId(regionUserId);
+            if(account != null){
+                AccountBill accountBill = new AccountBill();
+                accountBill.setAccountId(account.getAid());
+                accountBill.setType(AccountBillType.ENTER.value);
+                accountBill.setOrderSn(orderCommon.getOrderSn());
+                accountBill.setStatus(AccountBillStatus.FREE.value);
+                accountBill.setAmount(userAmount);
+                accountBill.setIsDelete(Boolean.FALSE);
+                accountBill.setCreateTime(now);
+                accountBill.setUpdateTime(now);
+                accountBill.setBillStatus(BillStatus.SUCCESS.value);
+                result = accountBillDao.addAccountBill(accountBill);
+                if(result != 1){
+                    throw new ServiceException("xxxxxxxxxxxxxxxxx " + regionUserId+ "楼长分润,冻结用户账单失败 xxxxxxxxxxxxxxxxxxx");
                 }
             }else{
-                platformAmount = shareAmount;
+                log.error("xxxxxxxxxxxxxxxxx {} 楼长分润,用户未开通账户 xxxxxxxxxxxxxxxxxxx",regionUserId);
             }
-        }else{
-            log.error("xxxxxxxxxxxxxxxxx找不到小区楼/宿舍管理员xxxxxxxxxxxxxxxxxxx");
         }
+        log.warn("代理商分润金额:{}",userAmount);
 
 
         //4、平台分润
+        BigDecimal amount         = orderCommon.getAmount();//订单总额
+        BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
+        BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
+        log.warn("平台商分润金额:{}",platformAmount);
         Account platformAccount= accountDao.findByAccountId(platformAccountId);
         if(platformAccount != null){
             AccountBill platformAccountBill = new AccountBill();
@@ -1109,51 +923,6 @@ public class OrderServiceImpl implements OrderService {
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommon.setOrderGoodsList(orderGoodsList);
         }
-
-        //============================分润账单========================
-        Long dormId = orderCommon.getDormId();
-        //1、配送员分润
-        BigDecimal shipFee = orderCommon.getShipFee();
-        orderCommon.setShareShipFee(shipFee);//运费
-
-        //2、供应商分润
-        BigDecimal totalCostPrice = new BigDecimal(0);
-        List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderCommon.getOrderSn());
-        if(!orderGoodsList.isEmpty()){
-            for(OrderGoods orderGoods:orderGoodsList){
-                String goodsCode = orderGoods.getGoodsCode();
-                String goodsSn = orderGoods.getGoodsSn();
-                Integer num = orderGoods.getNum();//购买数量
-                MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                if(mallGoods != null){
-                    BigDecimal costPrice = mallGoods.getCostPrice();
-                    totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                }
-            }
-        }
-        orderCommon.setShareMerchantFee(totalCostPrice);//供应商
-        log.warn("~供应商分润金额:{}",totalCostPrice);
-
-        //3、楼长分润
-        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-        if(userSchoolDorm != null){
-            String userId = userSchoolDorm.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-            if(userInfo != null){
-                BigDecimal amount = orderCommon.getAmount();//订单总额
-                BigDecimal shareAmount = amount.subtract(totalCostPrice);
-                BigDecimal share = userInfo.getDistributionRatio();
-                log.warn("~代理商分润比例:{}",share);
-                if(share != null){
-                    BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
-                    orderCommon.setShareUserAmount(userAmount);//楼长
-                    log.warn("~代理商分润金额:{}",userAmount);
-                }
-            }
-        }
-
-
         return orderCommon;
     }
 
@@ -1164,50 +933,6 @@ public class OrderServiceImpl implements OrderService {
             List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderSn);
             orderCommonOffLine.setOrderGoodsList(orderGoodsList);
         }
-        //账单分润
-        //============================生成分润账单========================
-        Long dormId = orderCommonOffLine.getDormId();
-
-        //1、配送员分润
-        BigDecimal shipFee = orderCommonOffLine.getShipFee();
-        orderCommonOffLine.setShareShipFee(shipFee);
-
-        //2、供应商分润
-        BigDecimal totalCostPrice = new BigDecimal(0);
-        List<OrderGoods> orderGoodsList = orderGoodsDao.findByOrderSn(orderCommonOffLine.getOrderSn());
-        if(!orderGoodsList.isEmpty()){
-            for(OrderGoods orderGoods:orderGoodsList){
-                String goodsCode = orderGoods.getGoodsCode();
-                String goodsSn = orderGoods.getGoodsSn();
-                Integer num = orderGoods.getNum();//购买数量
-                MallGoods mallGoods = mallGoodsDao.findByGoodsSnAndGoodsCode(goodsSn,goodsCode);
-                if(mallGoods != null){
-                    BigDecimal costPrice = mallGoods.getCostPrice();
-                    totalCostPrice = totalCostPrice.add(costPrice.multiply(new BigDecimal(num)));
-                }
-            }
-        }
-        orderCommonOffLine.setShareMerchantFee(totalCostPrice);
-        log.warn("~~供应商分润金额:{}",totalCostPrice);
-
-        //3、楼长分润
-        UserSchoolDorm userSchoolDorm = userSchoolDormDao.findByDormId(dormId);
-        if(userSchoolDorm != null){
-            String userId = userSchoolDorm.getUserId();
-            UserInfo userInfo = userInfoDao.findByUserId(userId);
-
-            if(userInfo != null){
-                BigDecimal amount = orderCommonOffLine.getAmount();//订单总额
-                BigDecimal shareAmount = amount.subtract(totalCostPrice);
-                BigDecimal share = userInfo.getDistributionRatio();
-                if(share != null){
-                    BigDecimal userAmount = shareAmount.multiply(share);//代理商分润
-                    orderCommonOffLine.setShareUserAmount(userAmount);
-                    log.warn("~~代理商分润金额:{}",userAmount);
-                }
-            }
-        }
-
         return orderCommonOffLine;
     }
 

@@ -8,6 +8,7 @@ import com.mall.model.OrderCommonOffLine;
 import com.mall.model.UserSchoolDormManage;
 import com.mall.params.page.PageCondition;
 import com.mall.params.status.OrderStatus;
+import com.mall.params.status.UserType;
 import com.mall.service.OrderService;
 import com.mall.service.SchoolService;
 import com.mall.webapi.controller.BaseController;
@@ -65,13 +66,7 @@ public class DeliverController extends BaseController {
         String token   = request.getParameter("token");
         String userId  = getUserId(token);
 
-        List<Object> dormIdList = new ArrayList<Object>();
-        List<UserSchoolDormManage> userSchoolDormManageList = schoolService.findByUserId(userId);
-        for(UserSchoolDormManage userSchoolDormManage:userSchoolDormManageList ){
-            dormIdList.add(userSchoolDormManage.getDormId());
-        }
-
-        PageInfo<OrderCommon> orderCommonPageInfo = orderService.userOrderListPage(condition,status,dormIdList);
+        PageInfo<OrderCommon> orderCommonPageInfo = orderService.userOrderListPage(condition,status,userId,UserType.DELIVERY.value);
         return JsonResult.success(orderCommonPageInfo);
     }
 
@@ -102,13 +97,7 @@ public class DeliverController extends BaseController {
         String token   = request.getParameter("token");
         String userId  = getUserId(token);
 
-        List<Object> dormIdList = new ArrayList<Object>();
-        List<UserSchoolDormManage> userSchoolDormManageList = schoolService.findByUserId(userId);
-        for(UserSchoolDormManage userSchoolDormManage:userSchoolDormManageList ){
-            dormIdList.add(userSchoolDormManage.getDormId());
-        }
-
-        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.userOfflineOrderListPage(condition,status,dormIdList);
+        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.userOfflineOrderListPage(condition,status,userId,UserType.DELIVERY.value);
         return JsonResult.success(orderCommonOffLinePageInfo);
     }
 

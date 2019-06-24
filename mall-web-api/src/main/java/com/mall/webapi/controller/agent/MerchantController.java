@@ -6,6 +6,7 @@ import com.java.response.JsonResult;
 import com.mall.model.*;
 import com.mall.params.page.PageCondition;
 import com.mall.params.status.OrderStatus;
+import com.mall.params.status.UserType;
 import com.mall.service.OrderService;
 import com.mall.service.SchoolService;
 import com.mall.webapi.controller.BaseController;
@@ -35,9 +36,6 @@ public class MerchantController extends BaseController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private SchoolService schoolService;
-
     /**
      * 我的订单列表，分页查询，订单状态，0：待支付，1：已支付(待配送)，2：已支付(配送中)，3：已支付（配送完成），4：订单完成， 5：已取消 6：已删除
      * @param request
@@ -65,18 +63,7 @@ public class MerchantController extends BaseController {
         String userId  = getUserId(token);
         log.warn("供货商ID：{}",userId);
 
-        List<Object> dormIdList = new ArrayList<Object>();
-        List<UserSchoolDormSupplier> userSchoolDormManageList = schoolService.findSupplierByUserId(userId);
-        for(UserSchoolDormSupplier userSchoolDormSupplier:userSchoolDormManageList ){
-            Long schoolId = userSchoolDormSupplier.getSchoolId();
-            List<SchoolDorm> schoolDormList = schoolService.findBySchoolId(schoolId);
-            for (SchoolDorm schoolDorm:schoolDormList){
-                dormIdList.add(schoolDorm.getId());
-            }
-        }
-        log.warn("dormIdList:{}",dormIdList.toString());
-        
-        PageInfo<OrderCommon> orderCommonPageInfo = orderService.userOrderListPage(condition,status,dormIdList);
+        PageInfo<OrderCommon> orderCommonPageInfo = orderService.userOrderListPage(condition,status,userId,UserType.SUPPLIER.value);
         return JsonResult.success(orderCommonPageInfo);
     }
 
@@ -109,19 +96,7 @@ public class MerchantController extends BaseController {
         String userId  = getUserId(token);
         log.warn("供货商ID：{}",userId);
 
-
-        List<Object> dormIdList = new ArrayList<Object>();
-        List<UserSchoolDormSupplier> userSchoolDormManageList = schoolService.findSupplierByUserId(userId);
-        for(UserSchoolDormSupplier userSchoolDormSupplier:userSchoolDormManageList ){
-            Long schoolId = userSchoolDormSupplier.getSchoolId();
-            List<SchoolDorm> schoolDormList = schoolService.findBySchoolId(schoolId);
-            for (SchoolDorm schoolDorm:schoolDormList){
-                dormIdList.add(schoolDorm.getId());
-            }
-        }
-        log.warn("dormIdList:{}",dormIdList.toString());
-
-        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.userOfflineOrderListPage(condition,status,dormIdList);
+        PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = orderService.userOfflineOrderListPage(condition,status,userId,UserType.SUPPLIER.value);
         log.warn("orderCommonPageInfo:{}",orderCommonOffLinePageInfo.toString());
         return JsonResult.success(orderCommonOffLinePageInfo);
     }

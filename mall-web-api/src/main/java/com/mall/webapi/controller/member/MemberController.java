@@ -821,6 +821,17 @@ public class MemberController extends BaseController {
             return JsonResult.fail("订单未支付");
         }
 
+        if(orderCommon.getStatus() == OrderStatus.PAYED_NO_DELIVER.value){
+            return JsonResult.fail("订单未派送");
+        }
+        if(orderCommon.getStatus() == OrderStatus.PAYED_NO_DELIVER.value){
+            return JsonResult.fail("订单未派送");
+        }
+
+        if(orderCommon.getStatus() != OrderStatus.PAYED_FINISH_DELIVER.value){
+            return JsonResult.fail("订单未派送完成");
+        }
+
         int result = orderService.finishOrderBySn(orderSn,memberId);
         if(result != 1){
             return JsonResult.fail("确认订单失败");
@@ -859,6 +870,11 @@ public class MemberController extends BaseController {
         if(orderCommonOffLine.getStatus() == OrderStatus.NO_PAY.value){
             return JsonResult.fail("订单未支付");
         }
+
+        if(orderCommonOffLine.getStatus() != OrderStatus.PAYED_FINISH_DELIVER.value){
+            return JsonResult.fail("订单未派送完成");
+        }
+
 
         int result = orderService.finishOfflineOrderBySn(orderSn,memberId);
         if(result != 1){

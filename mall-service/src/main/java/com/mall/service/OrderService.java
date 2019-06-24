@@ -29,8 +29,8 @@ public interface OrderService {
 
     int finishOfflineOrderBySn(String orderSn, String memberId);
 
-    PageInfo<OrderCommon> userOrderListPage(PageCondition condition, Long status, List<Object> dormIdList);
-    PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status, List<Object> dormIdList);
+    PageInfo<OrderCommon> userOrderListPage(PageCondition condition, Long status, String userId,int type);
+    PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status, String userId,int type);
 
     int updateOrderStatusBySn(String orderSn, int value);
 
