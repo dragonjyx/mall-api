@@ -103,10 +103,10 @@ public class MallCartDao {
         return count;
     }
 
-    public MallCart findByGoodsSnAndGoodsCode(String goodsSn, String goodsCode) {
+    public MallCart findByGoodsSnAndGoodsCode(String goodsSn, String goodsCode,String userId) {
         Example example = new Example(MallCart.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("goodsSn",goodsSn).andEqualTo("goodsCode",goodsCode);
+        criteria.andEqualTo("goodsSn",goodsSn).andEqualTo("goodsCode",goodsCode).andEqualTo("uid",userId);
         List<MallCart> mallCarts = mallCartMapper.selectByExample(example);
         if(mallCarts.isEmpty()){
             return null;

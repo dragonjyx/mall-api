@@ -34,8 +34,9 @@ public class MallServiceImpl implements MallAddressService,MallCartService,Adver
 
     @Override
     public int addMallCart(MallCart mallCart) {
-        MallCart tmpCart = mallCartDao.findByGoodsSnAndGoodsCode(mallCart.getGoodsSn(),mallCart.getGoodsCode());
+        MallCart tmpCart = mallCartDao.findByGoodsSnAndGoodsCode(mallCart.getGoodsSn(),mallCart.getGoodsCode(),mallCart.getUid());
         if(tmpCart != null){
+            log.warn("更新购物车:{}",tmpCart.toString());
             Integer buyNum = tmpCart.getBuyNum();
             buyNum = buyNum + mallCart.getBuyNum();
             tmpCart.setBuyNum(buyNum);

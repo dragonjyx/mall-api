@@ -172,11 +172,14 @@ public class MemberController extends BaseController {
         log.warn("添加购物车:{}",cart.toString());
         String token = request.getParameter("token");
         String openId = getOpenId(token);
+        log.warn("添加购物车token:{}",token);
+        log.warn("添加购物车openId:{}",openId);
         Member member = memberService.findByOpenId(openId);
         if(member == null){
             return JsonResult.fail("token 已失效");
         }
         String memberId = member.getMemberId();
+        log.warn("添加购物车memberId:{}",memberId);
         cart.setUid(memberId);
 
         int result = mallCartService.addMallCart(cart);

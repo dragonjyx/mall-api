@@ -43,6 +43,14 @@
         <result column="p_create_time"  property="createTime" />
         <result column="p_phone_num"  property="phoneNum" />
         <result column="p_receiver_name"  property="receiverName" />
+
+        <result column="p_merchant_user_id"  property="merchantUserId" />
+        <result column="p_merchant_share"  property="merchantShare" />
+        <result column="p_deliver_user_id"  property="deliverUserId" />
+        <result column="p_deliver_share"  property="deliverShare" />
+        <result column="p_region_user_id"  property="regionUserId" />
+        <result column="p_distribution_ratio"  property="distributionRatio" />
+        <result column="p_region_share"  property="regionShare" />
     </resultMap>
 
     <select id="findMerchantOrderList" resultMap="BaseResultMap">
