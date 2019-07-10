@@ -1,7 +1,6 @@
 package com.mall.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.java.utils.date.DateUtils;
@@ -171,6 +170,7 @@ public class OrderServiceImpl implements OrderService {
             orderCommon.setMerchantShare(totalCostPrice);
             orderCommon.setMerchantUserId(userSchoolDormSupplier.getUserId());
         }else{
+            orderCommon.setMerchantShare(new BigDecimal(0));
             log.error("xxxxxxxxxxxxxxxxx订单无供应商xxxxxxxxxxxxxxxxxxx");
         }
         //3.楼长分润
@@ -344,6 +344,7 @@ public class OrderServiceImpl implements OrderService {
             orderCommon.setMerchantShare(totalCostPrice);
             orderCommon.setMerchantUserId(userSchoolDormSupplier.getUserId());
         }else{
+            orderCommon.setMerchantShare(new BigDecimal(0));
             log.error("xxxxxxxxxxxxxxxxx订单无供应商xxxxxxxxxxxxxxxxxxx");
         }
         //3.楼长分润
@@ -426,7 +427,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public PageInfo<OrderCommon> userOrderListPage(PageCondition condition, Long status, String userId,int type) {
+    public PageInfo<OrderCommon> userOrderListPage(PageCondition condition, Long status, String userId, int type) {
         PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
         List<OrderCommon> orderCommonList = orderCommonDao.findByUserAndStatus(userId,status,type);
         for (OrderCommon orderCommon:orderCommonList){
@@ -439,7 +440,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status,String userId,int type) {
+    public PageInfo<OrderCommonOffLine> userOfflineOrderListPage(PageCondition condition, Long status, String userId, int type) {
         PageHelper.startPage(condition.getCurrentPage(),condition.getPageSize());
         List<OrderCommonOffLine> orderCommonOffLineList = orderCommonOffLineDao.findByUserAndStatus(userId,status,type);
         for (OrderCommonOffLine orderCommon:orderCommonOffLineList){
@@ -562,11 +563,11 @@ public class OrderServiceImpl implements OrderService {
 
         //账单分润
         //============================生成分润账单========================
+        Long dormId = orderCommonOffLine.getDormId();
         Date now = new Date();
         String month = DateUtils.Long2String(now.getTime(),"yyyy-MM");
 
         //1、配送员分润
-        boolean isDeliverExist = true;
         BigDecimal shipFee   = orderCommonOffLine.getDeliverShare();
         String deliverUserId = orderCommonOffLine.getDeliverUserId();
         if(shipFee != null && deliverUserId != null){
@@ -590,9 +591,6 @@ public class OrderServiceImpl implements OrderService {
             }else{
                 log.error("xxxxxxxxxxxxxxxxx配送员未开通账号xxxxxxxxxxxxxxxxxxx");
             }
-        }else{
-            isDeliverExist = false;
-            log.error("xxxxxxxxxxxxxxxxx配送员不存在,运费分给平台xxxxxxxxxxxxxxxxxxx");
         }
         log.warn("配送员分润金额:{}",shipFee);
 
@@ -662,18 +660,18 @@ public class OrderServiceImpl implements OrderService {
 
         //4、平台分润
         BigDecimal amount         = orderCommonOffLine.getAmount();//订单总额
-        BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
+        BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 批发价
         BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
-
-        if(!isDeliverExist && shipFee != null){
-            platformAmount = platformAmount.add(shipFee);
-        }
-
         log.warn("平台商分润金额:{}",platformAmount);
-        Account platformAccount= accountDao.findByAccountId(platformAccountId);
+//        Account platformAccount= accountDao.findByAccountId(platformAccountId);
+        UserInfo userInfo = userInfoDao.findByPhone(platformPhone);
+        if(userInfo == null){
+            throw new ServiceException("xxxxxxxxxxxxxxxxx " + platformPhone+ "该手机号未开通平台分润 xxxxxxxxxxxxxxxxxxx");
+        }
+        Account platformAccount= accountDao.findByUserId(userInfo.getUid());
         if(platformAccount != null){
             AccountBillOffline platformAccountBill = new AccountBillOffline();
-            platformAccountBill.setAccountId(platformAccountId);
+            platformAccountBill.setAccountId(platformAccount.getAid());
             platformAccountBill.setType(AccountBillType.ENTER.value);
             platformAccountBill.setOrderSn(orderCommonOffLine.getOrderSn());
             platformAccountBill.setStatus(AccountBillStatus.UNFREE.value);
@@ -737,8 +735,11 @@ public class OrderServiceImpl implements OrderService {
     private UserSchoolDormSupplierDao userSchoolDormSupplierDao;
 
 
-    @Value("${platform_account_id}")
-    private String platformAccountId;
+//    @Value("${platform_account_id}")
+//    private String platformAccountId;
+
+    @Value("${platform_phone}")
+    private String platformPhone;
 
 
     /**
@@ -755,7 +756,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //============================生成分润账单========================
-        boolean isDeliverExist = true;
         Date now = new Date();
         //1、配送员分润
         BigDecimal shipFee = orderCommon.getDeliverShare();
@@ -780,9 +780,6 @@ public class OrderServiceImpl implements OrderService {
             }else{
                 log.error("xxxxxxxxxxxxxxxxx配送员未开通账号xxxxxxxxxxxxxxxxxxx");
             }
-        }else{
-            log.error("xxxxxxxxxxxxxxxxx配送员不存在xxxxxxxxxxxxxxxxxxx");
-            isDeliverExist = false;
         }
         log.warn("配送员分润金额:{}",shipFee);
 
@@ -847,16 +844,16 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal amount         = orderCommon.getAmount();//订单总额
         BigDecimal shareAmount    = amount.subtract(totalCostPrice);//分润金额 = 订单总额 - 运费
         BigDecimal platformAmount = shareAmount.subtract(userAmount);//分润金额 - 代理商分润
-
-        if(!isDeliverExist && shipFee != null){
-            platformAmount = platformAmount.add(shipFee);
-        }
-
         log.warn("平台商分润金额:{}",platformAmount);
-        Account platformAccount= accountDao.findByAccountId(platformAccountId);
+        UserInfo userInfo = userInfoDao.findByPhone(platformPhone);
+        if(userInfo == null){
+            throw new ServiceException("xxxxxxxxxxxxxxxxx " + platformPhone+ "该手机号未开通平台分润 xxxxxxxxxxxxxxxxxxx");
+        }
+        Account platformAccount= accountDao.findByUserId(userInfo.getUid());
+//        Account platformAccount= accountDao.findByAccountId(platformAccountId);
         if(platformAccount != null){
             AccountBill platformAccountBill = new AccountBill();
-            platformAccountBill.setAccountId(platformAccountId);
+            platformAccountBill.setAccountId(platformAccount.getAid());
             platformAccountBill.setType(AccountBillType.ENTER.value);
             platformAccountBill.setOrderSn(orderCommon.getOrderSn());
             platformAccountBill.setStatus(AccountBillStatus.FREE.value);
