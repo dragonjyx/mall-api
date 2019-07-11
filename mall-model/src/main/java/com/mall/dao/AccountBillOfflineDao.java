@@ -31,6 +31,11 @@ public class AccountBillOfflineDao {
         return withdrawAmount;
     }
 
+    public BigDecimal sumSettleAmount(String accountId){
+        BigDecimal withdrawAmount = accountBillOfflineMapper.sumAmount(accountId,AccountBillType.ENTER.value,AccountBillStatus.UNFREE.value,BillStatus.SUCCESS.value,AccountBillOfflineSettleStatus.NO_SETTLE.value);
+        return withdrawAmount;
+    }
+
     public List<AccountBillOffline> findBillList(String accountId, Integer type, Date stateDate, Date endDate) {
         List<AccountBillOffline> accountBillOfflineList = accountBillOfflineMapper.findBillList(accountId,type,stateDate,endDate);
         return accountBillOfflineList;

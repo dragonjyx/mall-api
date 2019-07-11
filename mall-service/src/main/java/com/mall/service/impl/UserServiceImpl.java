@@ -631,7 +631,8 @@ public class UserServiceImpl implements UserService {
         result.put("offlineFreeAmount",offlineFreeAmount);//线下冻结金额
 
 
-        BigDecimal offlineSettlementAmount = settlementDao.sumSettlement(uid,2);
+//        BigDecimal offlineSettlementAmount = settlementDao.sumSettlement(uid,2);
+        BigDecimal offlineSettlementAmount = accountBillOfflineDao.sumSettleAmount(account.getAid());//变成线下未结算
         if(offlineSettlementAmount == null){
             offlineSettlementAmount = new BigDecimal(0);
         }
