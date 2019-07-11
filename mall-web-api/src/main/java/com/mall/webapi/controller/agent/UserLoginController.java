@@ -128,6 +128,7 @@ public class UserLoginController extends BaseController {
 
         try {
             JSONObject accountInfo = userService.findAccountInfo(user.getUid());
+            log.warn("-------------------accountInfo:{}",accountInfo.toJSONString());
             return JsonResult.success(accountInfo);
         }catch (ServiceException e){
             return JsonResult.fail(e.getMessage());
