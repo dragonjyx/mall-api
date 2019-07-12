@@ -119,8 +119,10 @@ public class WeChatServiceImpl implements WeChatService {
         }
 
 
-        WechatUserInfo wechatUserInfo  = wechatUserInfoDao.findByOpenId(openId);
+        WechatUserInfo wechatUserInfo  =  wechatUserInfoDao.findByPhoneNum(phoneNum);
+//        WechatUserInfo wechatUserInfo  = wechatUserInfoDao.findByOpenId(openId);
         if(wechatUserInfo !=null){//已经存在更新
+            wechatUserInfo.setOpenId(openId);
             wechatUserInfo.setPhoneNum(phoneNum);
             wechatUserInfo.setUnionId(wxUserInfo.getString("unionid"));
             wechatUserInfo.setCity(wxUserInfo.getString("city"));
