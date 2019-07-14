@@ -73,10 +73,21 @@ public class OrderTask extends QuartzJobBean {
                         throw new ServiceException(mallGoods.getName() + "库存添加，更新失败");
                     }
                 }
+            }
 
+            //把订单置为失效
+           int result  = orderService.setExpireOrder(orderSn);
+            if(result != 1){
+                throw new ServiceException(orderSn + "更新订单为取消状态失败");
             }
 
         }
+
+
+
+
+
+
 
     }
 

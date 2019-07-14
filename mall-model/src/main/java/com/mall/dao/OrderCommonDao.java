@@ -129,4 +129,8 @@ public class OrderCommonDao {
         List<OrderCommon> orderCommonList = orderCommonMapper.selectByExample(example);
         return orderCommonList;
     }
+
+    public int setExpire(String orderSn, int value) {
+        return orderCommonMapper.setExpireByOrderSn(orderSn,value);
+    }
 }

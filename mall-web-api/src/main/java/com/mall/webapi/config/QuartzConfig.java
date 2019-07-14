@@ -22,7 +22,7 @@ public class QuartzConfig {
     @Value("${corn.share_task}")
     private String shareTaskCron;
 
-/*    @Bean
+    @Bean
     public JobDetail orderJobDetail(){
         return JobBuilder.newJob(OrderTask.class).withIdentity(orderTaskIdentity).storeDurably().build();
     }
@@ -32,7 +32,7 @@ public class QuartzConfig {
         CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(orderTaskCron);
         Trigger trigger = TriggerBuilder.newTrigger().forJob(orderJobDetail()).withIdentity(orderTaskIdentity).withSchedule(cronScheduleBuilder).build();
         return trigger;
-    }*/
+    }
 
 
     @Bean

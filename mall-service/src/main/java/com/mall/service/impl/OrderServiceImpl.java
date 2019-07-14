@@ -983,4 +983,11 @@ public class OrderServiceImpl implements OrderService {
         PageInfo<OrderCommonOffLine> orderCommonOffLinePageInfo = new PageInfo<OrderCommonOffLine>(orderCommonOffLineList);
         return orderCommonOffLinePageInfo;
     }
+
+
+    @Override
+    public int setExpireOrder(String orderSn) {
+        int result = orderCommonDao.setExpire(orderSn,OrderStatus.CANCEL.value);
+        return result;
+    }
 }

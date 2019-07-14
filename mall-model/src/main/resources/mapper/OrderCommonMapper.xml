@@ -71,6 +71,11 @@
         </where>
         ORDER BY orderCommon.p_create_time DESC
     </select>
-  
+
+
+    <update id="setExpireByOrderSn">
+        UPDATE t_order_common SET p_status=#{status} WHERE p_order_sn=#{orderSn}
+    </update>
+
 
 </mapper>
